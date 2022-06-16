@@ -1,8 +1,0 @@
-LICENSE
-README.md
-pyproject.toml
-setup.py
-agamPrimer/AgamPrimer.egg-info/PKG-INFO
-agamPrimer/AgamPrimer.egg-info/SOURCES.txt
-agamPrimer/AgamPrimer.egg-info/dependency_links.txt
-agamPrimer/AgamPrimer.egg-info/top_level.txt

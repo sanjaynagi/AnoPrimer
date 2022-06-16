@@ -1,5 +1,11 @@
+import pandas as pd 
+import allel 
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+import malariagen_data
 
-
+ag3 = malariagen_data.Ag3()
 
 def prepare_gDNA_sequence(target_loc, amplicon_size_range, genome_seq):
   """
@@ -20,12 +26,11 @@ def prepare_gDNA_sequence(target_loc, amplicon_size_range, genome_seq):
   print(f"the target snp is {target_loc_primer3[0]} bp into our target sequence")
   return(target_sequence, target_loc_primer3, gdna_pos)
 
-def prepare_cDNA_sequence(transcript, genome_seq):
+def prepare_cDNA_sequence(transcript, gff, genome_seq):
   """
   Extract exonic sequence for our transcript and record exon-exon junctions
   """
   #subset gff to your gene
-  gff = ag3.geneset()
   gff = gff.query(f"type == 'exon' & Parent == @transcript") 
   # Get fasta sequence for each of our exons, and remember gDNA position
   seq = dict()
@@ -41,9 +46,8 @@ def prepare_cDNA_sequence(transcript, genome_seq):
   exon_junctions = np.array(np.cumsum(gff.end - gff.start))[:-1]
   exon_sizes = np.array(gff.end - gff.start)[:-1]
   exon_junctions_pos = [ex + gff.iloc[i, 3] for i, ex in enumerate(exon_sizes)]
-  print(f"Exon junctions for {transcript}:" ,exon_junctions, exon_junctions_pos, "\n")
+  print(f"Exon junctions for {transcript}:" , exon_junctions, exon_junctions_pos, "\n")
   return(target_mRNA_seq, list(map(int, exon_junctions)), gdna_pos)
-
 
 def rev_complement(seq):
     BASES ='NRWSMBDACGTHVKSWY'
@@ -54,7 +58,7 @@ def consecutive(data, stepsize=1):
     arr = [[a.min(), a.max()] for a in arr]
     return (arr)
 
-def get_primer_alt_frequencies(primer_df, gdna_pos, pair, sample_set, assay='gDNA'):
+def get_primer_alt_frequencies(primer_df, gdna_pos, pair, sample_set, assay, contig):
   """
   Find the genomic locations of pairs of primers, and runs span_to_freq
   to get allele frequencies at those locations
@@ -64,7 +68,7 @@ def get_primer_alt_frequencies(primer_df, gdna_pos, pair, sample_set, assay='gDN
   primer_loc_rev = primer_df.loc['PRIMER_RIGHT', str(pair)][0]+1
   primer_size_rev = primer_df.loc['PRIMER_RIGHT', str(pair)][1]
   
-  freq_arr, ref_arr, pos_arr = get_primer_arrays(gdna_pos=gdna_pos, assaytype=assay)
+  freq_arr, ref_arr, pos_arr = get_primer_arrays(contig=contig, gdna_pos=gdna_pos, sample_set=sample_set, assaytype=assay)
 
   freq_fwd = freq_arr[primer_loc_fwd:primer_loc_fwd+primer_size_fwd]
   freq_rev = np.flip(freq_arr[primer_loc_rev-primer_size_rev:primer_loc_rev])
@@ -82,7 +86,7 @@ def get_primer_alt_frequencies(primer_df, gdna_pos, pair, sample_set, assay='gDN
   assert rev_df.shape[0] == primer_size_rev, "Wrong size primers"
   return(fwd_df, rev_df)
 
-def get_primer_arrays(gdna_pos, assaytype):
+def get_primer_arrays(contig, gdna_pos, sample_set, assaytype):
 
   if assaytype == 'gDNA':
     span_str=f'{contig}:{gdna_pos.min()}-{gdna_pos.max()}'                        
@@ -107,7 +111,7 @@ def get_primer_arrays(gdna_pos, assaytype):
 
   return(freq_arr, ref_arr, pos_arr)
 
-def plot_pair_text(pair, ax, side, dict_dfs):
+def plot_pair_text(primer_df, pair, ax, side, dict_dfs):
   """
   Plot text relating to primer characteristics (Tm etc)
   """
@@ -121,7 +125,8 @@ def plot_pair_text(pair, ax, side, dict_dfs):
   ax.text(x=0.5, y=0.9, s="5'")
   ax.text(x=18, y=0.9, s="3'")
 
-def plot_primer(primer_df, ax, i, dict_dfs, assay, side='LEFT'):
+
+def plot_primer(primer_df, ax, i, dict_dfs, assay, side='LEFT', exon_junctions=None):
   """
   Plot primer allele frequencies and text
   """
@@ -143,9 +148,10 @@ def plot_primer(primer_df, ax, i, dict_dfs, assay, side='LEFT'):
       plt.setp(ax.get_xticklabels()[bases_in_new_exon[0]:], backgroundcolor="antiquewhite") if side == 'RIGHT' else plt.setp(ax.get_xticklabels()[:bases_in_new_exon[0]], backgroundcolor="antiquewhite")
 
   ax.set_title(f"FWD primer {i}") if side == 'LEFT' else  ax.set_title(f"REV primer {i}") 
-  plot_pair_text(i, ax, side, dict_dfs)
+  plot_pair_text(primer_df, i, ax, side, dict_dfs)
 
-def plot_primer_pairs(primer_df, sample_set, n_primer_pairs, assay, save=True):
+
+def plot_primer_pairs(primer_df, gdna_pos, contig, sample_set, n_primer_pairs, assay, name, target, exon_junctions=None, save=True):
   """
   Loop through n primer pairs, retrieving frequency data and plot allele frequencies
   """
@@ -153,12 +159,17 @@ def plot_primer_pairs(primer_df, sample_set, n_primer_pairs, assay, save=True):
   di_rev = {}
   # Loop through each primer pair and get the frequencies of alternate alleles, storing in dict
   for i in range(n_primer_pairs):
-    di_fwd[i], di_rev[i] = get_primer_alt_frequencies(primer_df, gdna_pos, i, sample_set, assay)
+    di_fwd[i], di_rev[i] = get_primer_alt_frequencies(primer_df, gdna_pos, i, sample_set, assay, contig)
+
   # Plot data
   fig, ax = plt.subplots(n_primer_pairs , 2, figsize=[14, (n_primer_pairs*2)+2], constrained_layout=True)    
-  fig.suptitle(f"{name} primer pairs | {sample_set} | target {target_loc} bp", fontweight='bold')
+  if assay == 'gDNA':
+    fig.suptitle(f"{name} primer pairs | {sample_set} | target {target} bp", fontweight='bold')
+  elif assay == 'qPCR':
+    fig.suptitle(f"{name} primer pairs | {sample_set} | target {target}", fontweight='bold')
+
   for i in range(n_primer_pairs):
-    plot_primer(primer_df, ax[i,0], i, di_fwd, assay, side='LEFT')
-    plot_primer(primer_df, ax[i,1], i, di_rev, assay, side='RIGHT')
+    plot_primer(primer_df, ax[i,0], i, di_fwd, assay, side='LEFT', exon_junctions=exon_junctions)
+    plot_primer(primer_df, ax[i,1], i, di_rev, assay, side='RIGHT', exon_junctions=exon_junctions)
   if save: fig.savefig(f"{name}.primers.png")
   return(di_fwd, di_rev)

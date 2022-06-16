@@ -4,8 +4,8 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="AgamPrimer",
-    version="0.0.2",
+    name="agamPrimer",
+    version="0.1.4",
     author="Sanjay Curtis Nagi",
     author_email="sanjay.c.nagi@gmail.com",
     description="A small package to store some functions for the PrimerDesignAg notebook, to improve readability.",
@@ -20,7 +20,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    package_dir={"": "agamPrimer"},
-    packages=setuptools.find_packages(where="src"),
+   # package_dir={"": "agamPrimer"},
+    packages=setuptools.find_packages(),
     python_requires=">=3.6",
 )
