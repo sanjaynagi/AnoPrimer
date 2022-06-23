@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="agamPrimer",
-    version="0.1.4",
+    version="0.1.6",
     author="Sanjay Curtis Nagi",
     author_email="sanjay.c.nagi@gmail.com",
     description="A small package to store some functions for the PrimerDesignAg notebook, to improve readability.",

@@ -3,6 +3,8 @@ import allel
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+import matplotlib
+from matplotlib import patches
 import malariagen_data
 
 ag3 = malariagen_data.Ag3()
@@ -173,3 +175,129 @@ def plot_primer_pairs(primer_df, gdna_pos, contig, sample_set, n_primer_pairs, a
     plot_primer(primer_df, ax[i,1], i, di_rev, assay, side='RIGHT', exon_junctions=exon_junctions)
   if save: fig.savefig(f"{name}.primers.png")
   return(di_fwd, di_rev)
+
+
+#### code to plot genes and primer positions, not finished
+
+def plot_qPCR_primers(gff, transcript, contig, n_primer_pairs, ax, di_fwd, di_rev):
+    # Load geneset (gff)
+    locgff = gff.query("Parent == @transcript & type == 'exon'")
+    min_= locgff.start.min() - 200
+    max_ = locgff.end.max() + 200
+    genegff = gff.query("contig == @contig & type == 'gene' & start > @min_ & end < @max_")
+    # configure axes
+    ax.set_xlim(min_, max_)
+    ax.set_ylim(-0.5, 1.5)
+    ax.ticklabel_format(useOffset=False)
+    ax.axhline(0.5, color='k', linewidth=3)
+    #ax.set_yticks(ticks=[0.2,1.2], size=20)#labels=['- ', '+']
+    ax.tick_params(top=False,left=False,right=False,labelleft=True,labelbottom=True)
+    ax.tick_params(axis='x', which='major', labelsize=13)
+    ax.set_ylabel("Genes")
+    ax.set_xlabel(f"Chromosome {contig} position", fontdict={'fontsize':14})
+    # Add rectangles for exons one at a time 
+    for _, exon in locgff.iterrows():
+        start, end = exon[['start', 'end']]
+        e_name = exon['Name'][-2:]
+        strand = exon['strand']
+        if strand == '+':
+            rect = patches.Rectangle((start, 0.55), end-start, 0.3, linewidth=3,
+                                edgecolor='none', facecolor="grey", alpha=0.9)
+            ax.text((start+end)/2, 0.65, e_name)
+        else:
+            rect = patches.Rectangle((start, 0.45), end-start, -0.3, linewidth=3,
+                                edgecolor='none', facecolor="grey", alpha=0.9)
+            ax.text((start+end)/2, 0.35, e_name)
+
+        ax.add_patch(rect)
+    for _, gene in genegff.iterrows():
+        start, end = gene[['start', 'end']]
+        size = end-start
+        corr = size/4
+        strand = gene['strand']
+        if strand == '+':
+            rect = patches.Rectangle((start, 0.55), end-start, 0.3, linewidth=3,
+                                edgecolor='black', facecolor="none")
+            ax.text(((start+end)/2)-corr, 0.95, s=gene['ID'], fontdict= {'fontsize':12}, weight='bold')
+        else:
+            rect = patches.Rectangle((start, 0.45), end-start, -0.3, linewidth=3,
+                                edgecolor='black', facecolor="none")
+            ax.text(((start+end)/2)-corr,  -0.3, s=gene['ID'], fontdict= {'fontsize':12},  weight='bold')
+        ax.add_patch(rect)
+
+    pal = sns.color_palette("Set2", n_primer_pairs)
+    handles, labels = ax.get_legend_handles_labels()
+    for pair in range(n_primer_pairs):
+      lower_fwd, upper_fwd = di_fwd[pair]['position'].min() , di_fwd[pair]['position'].max()
+      lower_rev, upper_rev = di_rev[pair]['position'].min() , di_rev[pair]['position'].max()
+
+      plt.arrow(lower_fwd, 1+(1.5/(10-(pair+1))), upper_fwd-lower_fwd, 0, width=0.03, length_includes_head=True, color=pal[pair])
+      plt.arrow(upper_rev, 1+(1.5/(10-(pair+1))), lower_rev-upper_rev, 0, width=0.03, length_includes_head=True, color=pal[pair])
+      # manually define a new patch 
+      patch = patches.Patch(color=pal[pair], label=f'pair {pair}')
+      # handles is a list, so append manual patch
+      handles.append(patch) 
+    # plot the legend
+    plt.legend(handles=handles, loc='best')
+
+
+def plot_gDNA_primers(gff, contig, start, end, n_primer_pairs, ax, di_fwd, di_rev):
+    # Load geneset (gff)
+    locgff = gff.query("contig == @contig & type == 'exon' & start > @start & end < @end")
+    min_= locgff.start.min() - 100
+    max_ = locgff.end.max() + 100
+    genegff = gff.query("contig == @contig & type == 'gene' & start > @min_ & end < @max_")
+    # configure axes
+    ax.set_xlim(min_, max_)
+    ax.set_ylim(-0.5, 1.5)
+    ax.ticklabel_format(useOffset=False)
+    ax.axhline(0.5, color='k', linewidth=3)
+    #ax.set_yticks(ticks=[0.2,1.2], size=20)#labels=['- ', '+']
+    ax.tick_params(top=False,left=False,right=False,labelleft=True,labelbottom=True)
+    ax.tick_params(axis='x', which='major', labelsize=13)
+    ax.set_ylabel("Genes")
+    ax.set_xlabel(f"Chromosome {contig} position", fontdict={'fontsize':14})
+    # Add rectangles for exons one at a time 
+    for _, exon in locgff.iterrows():
+        start, end = exon[['start', 'end']]
+        e_name = exon['Name'][-2:]
+        strand = exon['strand']
+        if strand == '+':
+            rect = patches.Rectangle((start, 0.55), end-start, 0.3, linewidth=3,
+                                edgecolor='none', facecolor="grey", alpha=0.9)
+            ax.text((start+end)/2, 0.65, e_name)
+        else:
+            rect = patches.Rectangle((start, 0.45), end-start, -0.3, linewidth=3,
+                                edgecolor='none', facecolor="grey", alpha=0.9)
+            ax.text((start+end)/2, 0.3, e_name)
+
+        ax.add_patch(rect)
+    for _, gene in genegff.iterrows():
+        start, end = gene[['start', 'end']]
+        size = end-start
+        corr = size/4
+        strand = gene['strand']
+        if strand == '+':
+            rect = patches.Rectangle((start, 0.55), end-start, 0.3, linewidth=3,
+                                edgecolor='black', facecolor="none")
+            ax.text(((start+end)/2)-corr, 0.95, s=gene['ID'], fontdict= {'fontsize':12}, weight='bold')
+        else:
+            rect = patches.Rectangle((start, 0.45), end-start, -0.3, linewidth=3,
+                                edgecolor='black', facecolor="none")
+            ax.text(((start+end)/2)-corr,  -0.3, s=gene['ID'], fontdict= {'fontsize':12},  weight='bold')
+        ax.add_patch(rect)
+
+    pal = sns.color_palette("Set2", n_primer_pairs)
+    handles, labels = ax.get_legend_handles_labels()
+    for pair in range(n_primer_pairs):
+      lower_fwd, upper_fwd = di_fwd[pair]['position'].min() , di_fwd[pair]['position'].max()
+      lower_rev, upper_rev = di_rev[pair]['position'].min() , di_rev[pair]['position'].max()
+
+      plt.arrow(lower_fwd, 1+(1.5/(10-(pair+1))), upper_fwd-lower_fwd, 0, width=0.03, length_includes_head=True, color=pal[pair])
+      plt.arrow(upper_rev, 1+(1.5/(10-(pair+1))), lower_rev-upper_rev, 0, width=0.03, length_includes_head=True, color=pal[pair])
+      # manually define a new patch 
+      patch = patches.Patch(color=pal[pair], label=f'pair {pair}')
+      # handles is a list, so append manual patch
+      handles.append(patch) 
+    # plot the legend
+    plt.legend(handles=handles, loc='best')
