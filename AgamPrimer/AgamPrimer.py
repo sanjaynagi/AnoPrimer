@@ -153,7 +153,7 @@ def plot_primer(primer_df, ax, i, dict_dfs, assay, side='LEFT', exon_junctions=N
   plot_pair_text(primer_df, i, ax, side, dict_dfs)
 
 
-def plot_primer_pairs(primer_df, gdna_pos, contig, sample_set, n_primer_pairs, assay, name, target, exon_junctions=None, save=True):
+def plot_primer_ag3_frequencies(primer_df, gdna_pos, contig, sample_set, n_primer_pairs, assay, name, target, exon_junctions=None, save=True):
   """
   Loop through n primer pairs, retrieving frequency data and plot allele frequencies
   """
@@ -173,7 +173,7 @@ def plot_primer_pairs(primer_df, gdna_pos, contig, sample_set, n_primer_pairs, a
   for i in range(n_primer_pairs):
     plot_primer(primer_df, ax[i,0], i, di_fwd, assay, side='LEFT', exon_junctions=exon_junctions)
     plot_primer(primer_df, ax[i,1], i, di_rev, assay, side='RIGHT', exon_junctions=exon_junctions)
-  if save: fig.savefig(f"{name}.primers.png")
+  if save: fig.savefig(f"{name}.{assay}.primers.png")
   return(di_fwd, di_rev)
 
 
@@ -240,20 +240,62 @@ def plot_qPCR_primers(gff, transcript, contig, n_primer_pairs, ax, di_fwd, di_re
     # plot the legend
     plt.legend(handles=handles, loc='best')
 
+def primer3_run_statistics(primer_dict):
+  primer_df = pd.DataFrame.from_dict(primer_dict.items())          # Convert the dict into a pandas dataframe
+  primer_df = primer_df.rename(columns={0:'parameter', 1:'value'}) # Rename the columns
+  explanations_df = primer_df.iloc[:7, :]                          # Take the first 7 rows which are general
+  for idx, row in explanations_df.iterrows():                      # Loop through each row and print information
+      print(row['parameter'], " : ", row['value'], "\n")
 
-def plot_gDNA_primers(gff, contig, start, end, n_primer_pairs, ax, di_fwd, di_rev):
-    # Load geneset (gff)
+def primer3_to_pandas(primer_dict):
+  primer_df = pd.DataFrame.from_dict(primer_dict.items())          # Convert the dict into a pandas dataframe
+  primer_df = primer_df.rename(columns={0:'parameter', 1:'value'}) # Rename the columns
+  # Create a column which is primer pair #, and a column for primer parameter which does not contain primer pair #
+  primer_df = primer_df.iloc[7:, :].copy()
+  primer_df['primer_pair'] = primer_df['parameter'].str.extract("([0-9][0-9]|[0-9])")
+  primer_df['parameter'] = primer_df['parameter'].str.replace("(_[0-9][0-9]|_[0-9])", "", regex=True)
+
+  # Put the different primer pairs in different columns
+  primer_df = primer_df.pivot(index='parameter', columns='primer_pair', values='value')
+
+  # Get a list of the rows we need 
+  primer_span = ['PRIMER_LEFT', 'PRIMER_RIGHT']
+  required_info = ['SEQUENCE', 'TM', 'GC_PERCENT']
+  required_info = [p + "_" + y for y in required_info for p in primer_span] + primer_span + ['PRIMER_PAIR_PRODUCT_SIZE']
+
+  # Subset data frame
+  primer_df = primer_df.loc[required_info, np.arange(primer_df.shape[1]).astype(str)]
+  return(primer_df)
+
+def get_gDNA_locs(gff, contig, start, end):
     locgff = gff.query("contig == @contig & type == 'exon' & start > @start & end < @end")
     min_= locgff.start.min() - 100
     max_ = locgff.end.max() + 100
     genegff = gff.query("contig == @contig & type == 'gene' & start > @min_ & end < @max_")
+    return(locgff, min_, max_, genegff)
+
+def get_qPCR_locs(gff, contig, transcript):
+    # Load geneset (gff)
+    locgff = gff.query("Parent == @transcript & type == 'exon'")
+    min_= locgff.start.min() - 200
+    max_ = locgff.end.max() + 200
+    genegff = gff.query("contig == @contig & type == 'gene' & start > @min_ & end < @max_")
+    return(locgff, min_, max_, genegff)
+
+def plot_primer_locs(gff, contig, n_primer_pairs, ax, di_fwd, di_rev, assay_type, start=None, end=None, transcript=None):
+    # Load geneset (gff)
+    if assay_type == 'gDNA':
+      locgff, min_, max_, genegff = get_gDNA_locs(gff, contig, start, end)
+    elif assay_type == 'qPCR':
+      locgff, min_, max_, genegff = get_qPCR_locs(gff, contig, transcript)
     # configure axes
     ax.set_xlim(min_, max_)
     ax.set_ylim(-0.5, 1.5)
     ax.ticklabel_format(useOffset=False)
-    ax.axhline(0.5, color='k', linewidth=3)
+    ax.axhline(0.5, color='k', linewidth=0.7, linestyle='--')
+    sns.despine(ax=ax, left=True, bottom=False)
     #ax.set_yticks(ticks=[0.2,1.2], size=20)#labels=['- ', '+']
-    ax.tick_params(top=False,left=False,right=False,labelleft=True,labelbottom=True)
+    ax.tick_params(top=False,left=False,right=False,labelleft=False,labelbottom=True)
     ax.tick_params(axis='x', which='major', labelsize=13)
     ax.set_ylabel("Genes")
     ax.set_xlabel(f"Chromosome {contig} position", fontdict={'fontsize':14})
@@ -293,8 +335,8 @@ def plot_gDNA_primers(gff, contig, start, end, n_primer_pairs, ax, di_fwd, di_re
       lower_fwd, upper_fwd = di_fwd[pair]['position'].min() , di_fwd[pair]['position'].max()
       lower_rev, upper_rev = di_rev[pair]['position'].min() , di_rev[pair]['position'].max()
 
-      plt.arrow(lower_fwd, 1+(1.5/(10-(pair+1))), upper_fwd-lower_fwd, 0, width=0.03, length_includes_head=True, color=pal[pair])
-      plt.arrow(upper_rev, 1+(1.5/(10-(pair+1))), lower_rev-upper_rev, 0, width=0.03, length_includes_head=True, color=pal[pair])
+      plt.arrow(lower_fwd, 0.8+(2/(10-(pair))), upper_fwd-lower_fwd, 0, width=0.03, length_includes_head=True, color=pal[pair])
+      plt.arrow(upper_rev, 0.8+(2/(10-(pair))), lower_rev-upper_rev, 0, width=0.03, length_includes_head=True, color=pal[pair])
       # manually define a new patch 
       patch = patches.Patch(color=pal[pair], label=f'pair {pair}')
       # handles is a list, so append manual patch
