@@ -9,47 +9,62 @@ import malariagen_data
 
 ag3 = malariagen_data.Ag3()
 
-def prepare_gDNA_sequence(target_loc, amplicon_size_range, genome_seq):
-  """
-  Extracts sequence of interest from genome sequence
-  """
-  # Set up range for the input sequence, we'll take the middle range of the amplicon size and add that either
-  # side of the target SNP
-  start = target_loc - np.mean(amplicon_size_range)
-  end = target_loc + np.mean(amplicon_size_range)  
-  # join array into be one character string, and store the positions of these sequences for later
-  target_sequence = ''.join(genome_seq[start:end].compute().astype(str))
-  gdna_pos = np.arange(start, end).astype(int) + 1
-  print(f"The target sequence is {len(target_sequence)} bases long")
 
-  # We need the target snp indices within the region of interest
-  target_loc_primer3 = int(np.where(gdna_pos == target_loc)[0])
-  target_loc_primer3 = [target_loc_primer3, 10]
-  print(f"the target snp is {target_loc_primer3[0]} bp into our target sequence")
-  return(target_sequence, target_loc_primer3, gdna_pos)
+def prepare_gDNA_sequence(target_loc, amplicon_size_range, genome_seq, assay_name):
+    """
+    Extracts sequence of interest from genome sequence
+    """
+    # Set up range for the input sequence, we'll take the middle range of the amplicon size and add that either
+    # side of the target SNP
+    start = target_loc - np.mean(amplicon_size_range)
+    end = target_loc + np.mean(amplicon_size_range)  
+    # join array into be one character string, and store the positions of these sequences for later
+    target_sequence = ''.join(genome_seq[start:end].compute().astype(str))
+    gdna_pos = np.arange(start, end).astype(int) + 1
+    print(f"The target sequence is {len(target_sequence)} bases long")
 
-def prepare_cDNA_sequence(transcript, gff, genome_seq):
-  """
-  Extract exonic sequence for our transcript and record exon-exon junctions
-  """
-  #subset gff to your gene
-  gff = gff.query(f"type == 'exon' & Parent == @transcript") 
-  # Get fasta sequence for each of our exons, and remember gDNA position
-  seq = dict()
-  gdna_pos = dict()
-  for i, exon in enumerate(zip(gff.start, gff.end)):
-      seq[i] = ''.join(np.array(genome_seq)[exon[0]-1:exon[1]].astype(str))
-      gdna_pos[i] = np.arange(exon[0]-1, exon[1])
-  #concatenate exon FASTAs into one big sequence
-  gdna_pos = np.concatenate(list(gdna_pos.values()))
-  target_mRNA_seq = ''.join(seq.values())
+    # We need the target snp indices within the region of interest
+    target_loc_primer3 = int(np.where(gdna_pos == target_loc)[0])
+    target_loc_primer3 = [target_loc_primer3, 10]
+    print(f"the target snp is {target_loc_primer3[0]} bp into our target sequence")
+    
+    seq_parameters = {
+            'SEQUENCE_ID': assay_name,
+            'SEQUENCE_TEMPLATE': target_sequence,
+        'SEQUENCE_TARGET':target_loc_primer3,
+        'GENOMIC_SEQUENCE_TARGET': target_loc
+        }
+    
+    return(target_sequence, gdna_pos, seq_parameters)
 
-  # Get list of exon junction positions
-  exon_junctions = np.array(np.cumsum(gff.end - gff.start))[:-1]
-  exon_sizes = np.array(gff.end - gff.start)[:-1]
-  exon_junctions_pos = [ex + gff.iloc[i, 3] for i, ex in enumerate(exon_sizes)]
-  print(f"Exon junctions for {transcript}:" , exon_junctions, exon_junctions_pos, "\n")
-  return(target_mRNA_seq, list(map(int, exon_junctions)), gdna_pos)
+def prepare_cDNA_sequence(transcript, gff, genome_seq, assay_name):
+    """
+    Extract exonic sequence for our transcript and record exon-exon junctions
+    """
+    #subset gff to your gene
+    gff = gff.query(f"type == 'exon' & Parent == @transcript") 
+    # Get fasta sequence for each of our exons, and remember gDNA position
+    seq = dict()
+    gdna_pos = dict()
+    for i, exon in enumerate(zip(gff.start, gff.end)):
+        seq[i] = ''.join(np.array(genome_seq)[exon[0]-1:exon[1]].astype(str))
+        gdna_pos[i] = np.arange(exon[0]-1, exon[1])
+    #concatenate exon FASTAs into one big sequence
+    gdna_pos = np.concatenate(list(gdna_pos.values()))
+    target_mRNA_seq = ''.join(seq.values())
+
+    # Get list of exon junction positions
+    exon_junctions = np.array(np.cumsum(gff.end - gff.start))[:-1]
+    exon_sizes = np.array(gff.end - gff.start)[:-1]
+    exon_junctions_pos = [ex + gff.iloc[i, 3] for i, ex in enumerate(exon_sizes)]
+    print(f"Exon junctions for {transcript}:" , exon_junctions, exon_junctions_pos, "\n")
+    seq_parameters = {
+            'SEQUENCE_ID': assay_name,
+            'SEQUENCE_TEMPLATE': target_mRNA_seq,
+        'SEQUENCE_OVERLAP_JUNCTION_LIST':list(map(int, exon_junctions)),
+        'TRANSCRIPT':transcript}
+
+    return(target_mRNA_seq, list(map(int, exon_junctions)), gdna_pos, seq_parameters)    
 
 def rev_complement(seq):
     BASES ='NRWSMBDACGTHVKSWY'
@@ -153,92 +168,33 @@ def plot_primer(primer_df, ax, i, dict_dfs, assay, side='LEFT', exon_junctions=N
   plot_pair_text(primer_df, i, ax, side, dict_dfs)
 
 
-def plot_primer_ag3_frequencies(primer_df, gdna_pos, contig, sample_set, n_primer_pairs, assay, name, target, exon_junctions=None, save=True):
+def plot_primer_ag3_frequencies(primer_df, gdna_pos, contig, sample_set, n_primer_pairs, assay_type, seq_parameters, save=True):
   """
   Loop through n primer pairs, retrieving frequency data and plot allele frequencies
   """
+  name = seq_parameters['SEQUENCE_ID']
+  exon_junctions = seq_parameters['SEQUENCE_OVERLAP_JUNCTION_LIST'] if assay_type == 'qPCR' else None
+  transcript = seq_parameters['TRANSCRIPT'] if assay_type == 'qPCR' else None
+  target_loc = seq_parameters['GENOMIC_SEQUENCE_TARGET'] if assay_type == 'gDNA' else None
   di_fwd = {}
   di_rev = {}
   # Loop through each primer pair and get the frequencies of alternate alleles, storing in dict
   for i in range(n_primer_pairs):
-    di_fwd[i], di_rev[i] = get_primer_alt_frequencies(primer_df, gdna_pos, i, sample_set, assay, contig)
+    di_fwd[i], di_rev[i] = get_primer_alt_frequencies(primer_df, gdna_pos, i, sample_set, assay_type, contig)
 
   # Plot data
   fig, ax = plt.subplots(n_primer_pairs , 2, figsize=[14, (n_primer_pairs*2)+2], constrained_layout=True)    
-  if assay == 'gDNA':
-    fig.suptitle(f"{name} primer pairs | {sample_set} | target {target} bp", fontweight='bold')
-  elif assay == 'qPCR':
-    fig.suptitle(f"{name} primer pairs | {sample_set} | target {target}", fontweight='bold')
+  if assay_type == 'gDNA':
+    fig.suptitle(f"{name} primer pairs | {sample_set} | target {target_loc} bp", fontweight='bold')
+  elif assay_type == 'qPCR':
+    fig.suptitle(f"{name} primer pairs | {sample_set} | target {transcript}", fontweight='bold')
 
   for i in range(n_primer_pairs):
-    plot_primer(primer_df, ax[i,0], i, di_fwd, assay, side='LEFT', exon_junctions=exon_junctions)
-    plot_primer(primer_df, ax[i,1], i, di_rev, assay, side='RIGHT', exon_junctions=exon_junctions)
-  if save: fig.savefig(f"{name}.{assay}.primers.png")
+    plot_primer(primer_df, ax[i,0], i, di_fwd, assay_type, side='LEFT', exon_junctions=exon_junctions)
+    plot_primer(primer_df, ax[i,1], i, di_rev, assay_type, side='RIGHT', exon_junctions=exon_junctions)
+  if save: fig.savefig(f"{name}.{assay_type}.primers.png")
   return(di_fwd, di_rev)
 
-
-#### code to plot genes and primer positions, not finished
-
-def plot_qPCR_primers(gff, transcript, contig, n_primer_pairs, ax, di_fwd, di_rev):
-    # Load geneset (gff)
-    locgff = gff.query("Parent == @transcript & type == 'exon'")
-    min_= locgff.start.min() - 200
-    max_ = locgff.end.max() + 200
-    genegff = gff.query("contig == @contig & type == 'gene' & start > @min_ & end < @max_")
-    # configure axes
-    ax.set_xlim(min_, max_)
-    ax.set_ylim(-0.5, 1.5)
-    ax.ticklabel_format(useOffset=False)
-    ax.axhline(0.5, color='k', linewidth=3)
-    #ax.set_yticks(ticks=[0.2,1.2], size=20)#labels=['- ', '+']
-    ax.tick_params(top=False,left=False,right=False,labelleft=True,labelbottom=True)
-    ax.tick_params(axis='x', which='major', labelsize=13)
-    ax.set_ylabel("Genes")
-    ax.set_xlabel(f"Chromosome {contig} position", fontdict={'fontsize':14})
-    # Add rectangles for exons one at a time 
-    for _, exon in locgff.iterrows():
-        start, end = exon[['start', 'end']]
-        e_name = exon['Name'][-2:]
-        strand = exon['strand']
-        if strand == '+':
-            rect = patches.Rectangle((start, 0.55), end-start, 0.3, linewidth=3,
-                                edgecolor='none', facecolor="grey", alpha=0.9)
-            ax.text((start+end)/2, 0.65, e_name)
-        else:
-            rect = patches.Rectangle((start, 0.45), end-start, -0.3, linewidth=3,
-                                edgecolor='none', facecolor="grey", alpha=0.9)
-            ax.text((start+end)/2, 0.35, e_name)
-
-        ax.add_patch(rect)
-    for _, gene in genegff.iterrows():
-        start, end = gene[['start', 'end']]
-        size = end-start
-        corr = size/4
-        strand = gene['strand']
-        if strand == '+':
-            rect = patches.Rectangle((start, 0.55), end-start, 0.3, linewidth=3,
-                                edgecolor='black', facecolor="none")
-            ax.text(((start+end)/2)-corr, 0.95, s=gene['ID'], fontdict= {'fontsize':12}, weight='bold')
-        else:
-            rect = patches.Rectangle((start, 0.45), end-start, -0.3, linewidth=3,
-                                edgecolor='black', facecolor="none")
-            ax.text(((start+end)/2)-corr,  -0.3, s=gene['ID'], fontdict= {'fontsize':12},  weight='bold')
-        ax.add_patch(rect)
-
-    pal = sns.color_palette("Set2", n_primer_pairs)
-    handles, labels = ax.get_legend_handles_labels()
-    for pair in range(n_primer_pairs):
-      lower_fwd, upper_fwd = di_fwd[pair]['position'].min() , di_fwd[pair]['position'].max()
-      lower_rev, upper_rev = di_rev[pair]['position'].min() , di_rev[pair]['position'].max()
-
-      plt.arrow(lower_fwd, 1+(1.5/(10-(pair+1))), upper_fwd-lower_fwd, 0, width=0.03, length_includes_head=True, color=pal[pair])
-      plt.arrow(upper_rev, 1+(1.5/(10-(pair+1))), lower_rev-upper_rev, 0, width=0.03, length_includes_head=True, color=pal[pair])
-      # manually define a new patch 
-      patch = patches.Patch(color=pal[pair], label=f'pair {pair}')
-      # handles is a list, so append manual patch
-      handles.append(patch) 
-    # plot the legend
-    plt.legend(handles=handles, loc='best')
 
 def primer3_run_statistics(primer_dict):
   primer_df = pd.DataFrame.from_dict(primer_dict.items())          # Convert the dict into a pandas dataframe
@@ -282,11 +238,14 @@ def get_qPCR_locs(gff, contig, transcript):
     genegff = gff.query("contig == @contig & type == 'gene' & start > @min_ & end < @max_")
     return(locgff, min_, max_, genegff)
 
-def plot_primer_locs(gff, contig, n_primer_pairs, ax, di_fwd, di_rev, assay_type, start=None, end=None, transcript=None):
+def plot_primer_locs(gff, contig, seq_parameters, n_primer_pairs, ax, di_fwd, di_rev, assay_type):
     # Load geneset (gff)
     if assay_type == 'gDNA':
+      start = seq_parameters['GENOMIC_SEQUENCE_TARGET'] - 500
+      end = seq_parameters['GENOMIC_SEQUENCE_TARGET'] + 500
       locgff, min_, max_, genegff = get_gDNA_locs(gff, contig, start, end)
     elif assay_type == 'qPCR':
+      transcript = seq_parameters['TRANSCRIPT']
       locgff, min_, max_, genegff = get_qPCR_locs(gff, contig, transcript)
     # configure axes
     ax.set_xlim(min_, max_)
@@ -297,7 +256,7 @@ def plot_primer_locs(gff, contig, n_primer_pairs, ax, di_fwd, di_rev, assay_type
     #ax.set_yticks(ticks=[0.2,1.2], size=20)#labels=['- ', '+']
     ax.tick_params(top=False,left=False,right=False,labelleft=False,labelbottom=True)
     ax.tick_params(axis='x', which='major', labelsize=13)
-    ax.set_ylabel("Genes")
+    ax.set_ylabel("Exons")
     ax.set_xlabel(f"Chromosome {contig} position", fontdict={'fontsize':14})
     # Add rectangles for exons one at a time 
     for _, exon in locgff.iterrows():
