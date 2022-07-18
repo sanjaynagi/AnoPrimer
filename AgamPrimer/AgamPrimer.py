@@ -224,7 +224,7 @@ def plot_pair_text(primer_df, pair, ax, oligo, res_dict):
   ax.text(x=0.5, y=0.9, s="5'")
   ax.text(x=18, y=0.9, s="3'")
 
-def plot_primer(primer_df, ax, i, res_dict, assay, exon_junctions=None, target_loc=None):
+def plot_primer(primer_df, ax, i, res_dict, assay_type, exon_junctions=None, target_loc=None):
   """
   Plot primer allele frequencies and text
   """
@@ -245,7 +245,7 @@ def plot_primer(primer_df, ax, i, res_dict, assay, exon_junctions=None, target_l
       axes.set_ylabel("")
       axes.set_yticklabels("")
 
-    if assay == 'qPCR primers':
+    if assay_type == 'qPCR primers':
       a = primer_df.loc[f'PRIMER_{oligo}', str(i)]
       a = a[0] - a[1] if oligo == 'RIGHT' else a[0] + a[1]
       arr = np.array(exon_junctions) - a
