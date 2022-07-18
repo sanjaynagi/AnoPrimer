@@ -10,16 +10,17 @@ import malariagen_data
 ag3 = malariagen_data.Ag3()
 
 
-def prepare_gDNA_sequence(target_loc, amplicon_size_range, genome_seq, assay_name):
+def prepare_gDNA_sequence(target_loc, amplicon_size_range, genome_seq, assay_name, assay_type, probe_exclude_region_size=16):
     """
     Extracts sequence of interest from genome sequence
     """
     # Set up range for the input sequence, we'll take the middle range of the amplicon size and add that either
     # side of the target SNP
-    start = target_loc - np.mean(amplicon_size_range)
-    end = target_loc + np.mean(amplicon_size_range)  
+    amp_size_range = amplicon_size_range[0][1]-amplicon_size_range[0][0]
+    start = target_loc - amp_size_range
+    end = target_loc + amp_size_range
     # join array into be one character string, and store the positions of these sequences for later
-    target_sequence = ''.join(genome_seq[start:end].compute().astype(str))
+    target_sequence = ''.join(genome_seq[start:end-1].compute().astype(str))
     gdna_pos = np.arange(start, end).astype(int) + 1
     print(f"The target sequence is {len(target_sequence)} bases long")
 
@@ -34,8 +35,12 @@ def prepare_gDNA_sequence(target_loc, amplicon_size_range, genome_seq, assay_nam
         'SEQUENCE_TARGET':target_loc_primer3,
         'GENOMIC_SEQUENCE_TARGET': target_loc
         }
+        
+    if 'probe' in assay_type:
+        seq_parameters['SEQUENCE_INTERNAL_EXCLUDED_REGION'] = [[1,target_loc_primer3[0]-probe_exclude_region_size], [target_loc_primer3[0]+probe_exclude_region_size, len(target_sequence)-(target_loc_primer3[0]+probe_exclude_region_size)]]
     
     return(target_sequence, gdna_pos, seq_parameters)
+    
 
 def prepare_cDNA_sequence(transcript, gff, genome_seq, assay_name):
     """
@@ -66,6 +71,79 @@ def prepare_cDNA_sequence(transcript, gff, genome_seq, assay_name):
 
     return(target_mRNA_seq, list(map(int, exon_junctions)), gdna_pos, seq_parameters)    
 
+
+
+
+def primer_params(primer_parameters, assay_type):
+    if assay_type == 'gDNA primers + probe':
+        primer_parameters['PRIMER_PICK_INTERNAL_OLIGO'] = 1
+        primer_parameters['PRIMER_PICK_RIGHT_PRIMER'] = 1
+        primer_parameters['PRIMER_PICK_LEFT_PRIMER'] = 1
+    elif assay_type == 'probe':
+        primer_parameters['PRIMER_PICK_INTERNAL_OLIGO'] = 1
+        primer_parameters['PRIMER_PICK_RIGHT_PRIMER'] = 0
+        primer_parameters['PRIMER_PICK_LEFT_PRIMER'] = 0
+    return(primer_parameters)
+
+def primer3_run_statistics(primer_dict, assay_type):
+    _, row_start = return_oligo_list(assay_type)
+
+    primer_df = pd.DataFrame.from_dict(primer_dict.items())          # Convert the dict into a pandas dataframe
+    primer_df = primer_df.rename(columns={0:'parameter', 1:'value'}) # Rename the columns
+    explanations_df = primer_df.iloc[:row_start, :]         # Take the first 7 rows which are general
+    for idx, row in explanations_df.iterrows():                      # Loop through each row and print information
+        print(row['parameter'], " : ", row['value'], "\n")
+
+
+def return_oligo_list(assay_type):
+    if assay_type == 'probe':
+        oligos = ['INTERNAL']
+        row_start = 5
+    elif any(item == assay_type for item in ['gDNA primers', 'qPCR primers']):
+        oligos = ['LEFT', 'RIGHT']
+        row_start = 7
+    elif assay_type == 'gDNA primers + probe':
+        oligos = ['LEFT', 'RIGHT', 'INTERNAL']
+        row_start = 8
+    return(oligos, row_start)
+
+def primer3_to_pandas(primer_dict, assay_type):
+
+    oligos, row_start = return_oligo_list(assay_type)
+    print(row_start)
+
+    primer_df = pd.DataFrame.from_dict(primer_dict.items())          # Convert the dict into a pandas dataframe
+    primer_df = primer_df.rename(columns={0:'parameter', 1:'value'}) # Rename the columns
+    # Create a column which is primer pair #, and a column for primer parameter which does not contain primer pair #
+    primer_df = primer_df.iloc[row_start:, :].copy()
+    primer_df['primer_pair'] = primer_df['parameter'].str.extract("([0-9][0-9]|[0-9])")
+    primer_df['parameter'] = primer_df['parameter'].str.replace("(_[0-9][0-9]|_[0-9])", "", regex=True)
+
+    # Put the different primer pairs in different columns
+    primer_df = primer_df.pivot(index='parameter', columns='primer_pair', values='value')
+
+    # Get a list of the rows we need 
+    primer_span = [f'PRIMER_{oligo}' for oligo in oligos]
+    required_info = ['SEQUENCE', 'TM', 'GC_PERCENT']
+    required_info = [p + "_" + y for y in required_info for p in primer_span] + primer_span
+    required_info = required_info + ['PRIMER_PAIR_PRODUCT_SIZE'] if assay_type != 'probe' else required_info
+
+    # Subset data frame
+    primer_df = primer_df.loc[required_info, np.arange(primer_df.shape[1]).astype(str)]
+    return(primer_df)
+
+
+
+
+
+
+
+
+
+
+##### PLOTTING
+
+  
 def rev_complement(seq):
     BASES ='NRWSMBDACGTHVKSWY'
     return ''.join([BASES[-j] for j in [BASES.find(i) for i in seq][::-1]])
@@ -75,50 +153,23 @@ def consecutive(data, stepsize=1):
     arr = [[a.min(), a.max()] for a in arr]
     return (arr)
 
-def get_primer_alt_frequencies(primer_df, gdna_pos, pair, sample_set, assay, contig):
-  """
-  Find the genomic locations of pairs of primers, and runs span_to_freq
-  to get allele frequencies at those locations
-  """
-  primer_loc_fwd = primer_df.loc['PRIMER_LEFT', str(pair)][0]
-  primer_size_fwd = primer_df.loc['PRIMER_LEFT', str(pair)][1]
-  primer_loc_rev = primer_df.loc['PRIMER_RIGHT', str(pair)][0]+1
-  primer_size_rev = primer_df.loc['PRIMER_RIGHT', str(pair)][1]
-  
-  freq_arr, ref_arr, pos_arr = get_primer_arrays(contig=contig, gdna_pos=gdna_pos, sample_set=sample_set, assaytype=assay)
 
-  freq_fwd = freq_arr[primer_loc_fwd:primer_loc_fwd+primer_size_fwd]
-  freq_rev = np.flip(freq_arr[primer_loc_rev-primer_size_rev:primer_loc_rev])
-  ref_fwd = ref_arr[primer_loc_fwd:primer_loc_fwd+primer_size_fwd]
-  ref_rev = ref_arr[primer_loc_rev-primer_size_rev:primer_loc_rev]
-  ref_rev = np.array(list(rev_complement(''.join(ref_rev))), dtype=str)
-  pos_fwd = pos_arr[primer_loc_fwd:primer_loc_fwd+primer_size_fwd]
-  pos_rev = np.flip(pos_arr[primer_loc_rev-primer_size_rev:primer_loc_rev])
+def get_primer_arrays(contig, gdna_pos, sample_set, assay_type):
 
-  fwd_df = pd.DataFrame({'position': pos_fwd, 'base':ref_fwd, 'alt_frequency':freq_fwd}) # Make dataframe for plotting
-  rev_df = pd.DataFrame({'position': pos_rev, 'base':ref_rev, 'alt_frequency':freq_rev}) # Make dataframe for plotting
-  fwd_df['base_pos'] = fwd_df['base'] + "_" + fwd_df['position'].astype(str)
-  assert fwd_df.shape[0] == primer_size_fwd, "Wrong size primers"
-  rev_df['base_pos'] = rev_df['base'] + "_" + rev_df['position'].astype(str) 
-  assert rev_df.shape[0] == primer_size_rev, "Wrong size primers"
-  return(fwd_df, rev_df)
-
-def get_primer_arrays(contig, gdna_pos, sample_set, assaytype):
-
-  if assaytype == 'gDNA':
+  if any(item in assay_type for item in ['gDNA', 'probe']):
     span_str=f'{contig}:{gdna_pos.min()}-{gdna_pos.max()}'                        
     ref_arr = ag3.genome_sequence(region=span_str).compute().astype(str)     # get dna sequence for span
     geno = ag3.snp_genotypes(region=span_str, sample_sets=sample_set).compute() # get genotypes
     freqs = allel.GenotypeArray(geno).count_alleles().to_frequencies()                                # calculate allele frequencies
     freq_arr = freqs[:, 1:].sum(axis=1)
     pos_arr = gdna_pos
-  elif assaytype == 'qPCR':
+  elif assay_type == 'qPCR primers':
     freq_arr = np.array([])
     ref_arr = np.array([])
     pos_arr = np.array([])
     exon_spans = np.array(consecutive(gdna_pos)) +1
     for span in exon_spans:
-      span_str=f'{contig}:{span[0]}-{span[1]}'                        
+      span_str = f'{contig}:{span[0]}-{span[1]}'                        
       primer_ref_seq = ag3.genome_sequence(region=span_str).compute().astype(str)     # get dna sequence for span
       geno = ag3.snp_genotypes(region=span_str, sample_sets=sample_set).compute() # get genotypes
       freqs = allel.GenotypeArray(geno).count_alleles().to_frequencies()                                # calculate allele frequencies
@@ -128,13 +179,44 @@ def get_primer_arrays(contig, gdna_pos, sample_set, assaytype):
 
   return(freq_arr, ref_arr, pos_arr)
 
-def plot_pair_text(primer_df, pair, ax, side, dict_dfs):
+
+def get_primer_alt_frequencies(primer_df, gdna_pos, pair, sample_set, assay_type, contig):
+  """
+  Find the genomic locations of pairs of primers, and runs span_to_freq
+  to get allele frequencies at those locations
+  """
+
+  oligos, _ = return_oligo_list(assay_type)
+  freq_arr, ref_arr, pos_arr = get_primer_arrays(contig=contig, gdna_pos=gdna_pos, sample_set=sample_set, assay_type=assay_type)
+
+  di = {}
+  for oligo in oligos:
+    primer_loc = primer_df.loc[f'PRIMER_{oligo}', str(pair)][0]
+    primer_loc = primer_loc + 1 if oligo == 'RIGHT' else primer_loc
+    primer_size = primer_df.loc[f'PRIMER_{oligo}', str(pair)][1]
+    if oligo in ['LEFT', 'INTERNAL']:
+      freq = freq_arr[primer_loc:primer_loc+primer_size]
+      ref = ref_arr[primer_loc:primer_loc+primer_size]
+      pos = pos_arr[primer_loc:primer_loc+primer_size]
+    elif oligo == 'RIGHT':
+      freq = np.flip(freq_arr[primer_loc-primer_size:primer_loc])
+      ref = ref_arr[primer_loc-primer_size:primer_loc]
+      ref = np.array(list(rev_complement(''.join(ref))), dtype=str)
+      pos = np.flip(pos_arr[primer_loc-primer_size:primer_loc])
+
+    df = pd.DataFrame({'position': pos, 'base':ref, 'alt_frequency':freq}) # Make dataframe for plotting
+    df['base_pos'] = df['base'] + "_" + df['position'].astype(str)
+    assert df.shape[0] == primer_size, "Wrong size primers"
+    di[oligo] = df
+  return(di)
+
+def plot_pair_text(primer_df, pair, ax, oligo, res_dict):
   """
   Plot text relating to primer characteristics (Tm etc)
   """
-  tm = np.round(primer_df.loc[f'PRIMER_{side}_TM', str(pair)], 2)       
-  gc = np.round(primer_df.loc[f'PRIMER_{side}_GC_PERCENT', str(pair)], 2)
-  span = f"{int(dict_dfs[pair]['position'].min())}-{int(dict_dfs[pair]['position'].max())}"
+  tm = np.round(primer_df.loc[f'PRIMER_{oligo}_TM', str(pair)], 2)       
+  gc = np.round(primer_df.loc[f'PRIMER_{oligo}_GC_PERCENT', str(pair)], 2)
+  span = f"{int(res_dict[pair][oligo]['position'].min())}-{int(res_dict[pair][oligo]['position'].max())}"
   # Write text to plot for Tm, GC, span, and 3/5'
   ax.text(x=2, y=0.5, s=f"TM={tm}", bbox=dict(facecolor='white', edgecolor='black', alpha=0.4, boxstyle='round', pad=0.5))
   ax.text(x=2, y=0.7, s=f"GC={gc}", bbox=dict(facecolor='white', edgecolor='black', alpha=0.4, boxstyle='round', pad=0.5))
@@ -142,86 +224,86 @@ def plot_pair_text(primer_df, pair, ax, side, dict_dfs):
   ax.text(x=0.5, y=0.9, s="5'")
   ax.text(x=18, y=0.9, s="3'")
 
-
-def plot_primer(primer_df, ax, i, dict_dfs, assay, side='LEFT', exon_junctions=None):
+def plot_primer(primer_df, ax, i, res_dict, assay, exon_junctions=None, target_loc=None):
   """
   Plot primer allele frequencies and text
   """
-  sns.scatterplot(ax=ax, x=dict_dfs[i]['base_pos'], y=dict_dfs[i]['alt_frequency'], s=200) 
-  ax.set_xticklabels(dict_dfs[i]['base'])
-  ax.set_ylim(0,1)
-  ax.set_xlabel("")
-  ax.set_ylabel("Alternate allele frequency")
-  if side == 'RIGHT': 
-    ax.set_ylabel("")
-    ax.set_yticklabels("")
+  oligos, _ = return_oligo_list(assay_type)
 
-  if assay == 'qPCR':
-    a = primer_df.loc[f'PRIMER_{side}', str(i)]
-    a = a[0] - a[1] if side == 'RIGHT' else a[0] + a[1]
-    arr = np.array(exon_junctions)- a
-    if (np.abs(arr) < 18).any():
-      bases_in_new_exon  = arr[np.abs(arr) < 18]
-      plt.setp(ax.get_xticklabels()[bases_in_new_exon[0]:], backgroundcolor="antiquewhite") if side == 'RIGHT' else plt.setp(ax.get_xticklabels()[:bases_in_new_exon[0]], backgroundcolor="antiquewhite")
+  for idx, oligo in enumerate(oligos):
+    if len(oligos) > 1:
+      axes = ax[i, idx]
+    else:
+      axes = ax[i]
 
-  ax.set_title(f"FWD primer {i}") if side == 'LEFT' else  ax.set_title(f"REV primer {i}") 
-  plot_pair_text(primer_df, i, ax, side, dict_dfs)
+    sns.scatterplot(ax=axes, x=res_dict[i][oligo]['base_pos'], y=res_dict[i][oligo]['alt_frequency'], s=200) 
+    axes.set_xticklabels(res_dict[i][oligo]['base'])
+    axes.set_ylim(0,1)
+    axes.set_xlabel("")
+    axes.set_ylabel("Alternate allele frequency")
+    if idx > 0: 
+      axes.set_ylabel("")
+      axes.set_yticklabels("")
 
+    if assay == 'qPCR primers':
+      a = primer_df.loc[f'PRIMER_{oligo}', str(i)]
+      a = a[0] - a[1] if oligo == 'RIGHT' else a[0] + a[1]
+      arr = np.array(exon_junctions) - a
+      if (np.abs(arr) < 18).any():
+        bases_in_new_exon  = arr[np.abs(arr) < 18]
+        plt.setp(axes.get_xticklabels()[bases_in_new_exon[0]:], backgroundcolor="antiquewhite") if oligo == 'RIGHT' else plt.setp(axes.get_xticklabels()[:bases_in_new_exon[0]], backgroundcolor="antiquewhite")
+    
+    if oligo == 'LEFT':
+      axes.set_title(f"Forward primer {i}") 
+    elif oligo == 'RIGHT':
+      axes.set_title(f"Reverse primer {i}")
+    elif oligo == 'INTERNAL':
+      axes.set_title(f"Probe {i}")
+      idx = np.where(res_dict[i][oligo]['position'] == target_loc)[0][0]
+      print(idx)
+      plt.setp(axes.get_xticklabels()[idx], backgroundcolor="antiquewhite")
+    plot_pair_text(primer_df, i, axes, oligo, res_dict)
+  
 
-def plot_primer_ag3_frequencies(primer_df, gdna_pos, contig, sample_set, n_primer_pairs, assay_type, seq_parameters, save=True):
+def plot_primer_ag3_frequencies(primer_df, gdna_pos, contig, sample_set, assay_type, seq_parameters, save=True):
   """
   Loop through n primer pairs, retrieving frequency data and plot allele frequencies
   """
+  n_primer_pairs=len(primer_df.columns)
   name = seq_parameters['SEQUENCE_ID']
-  exon_junctions = seq_parameters['SEQUENCE_OVERLAP_JUNCTION_LIST'] if assay_type == 'qPCR' else None
-  transcript = seq_parameters['TRANSCRIPT'] if assay_type == 'qPCR' else None
-  target_loc = seq_parameters['GENOMIC_SEQUENCE_TARGET'] if assay_type == 'gDNA' else None
-  di_fwd = {}
-  di_rev = {}
+  exon_junctions = seq_parameters['SEQUENCE_OVERLAP_JUNCTION_LIST'] if assay_type == 'qPCR primers' else None
+  transcript = seq_parameters['TRANSCRIPT'] if assay_type == 'qPCR primers' else None
+  target_loc = seq_parameters['GENOMIC_SEQUENCE_TARGET'] if any(item in assay_type for item in ['gDNA', 'probe']) else None
+  res_dict = {}
   # Loop through each primer pair and get the frequencies of alternate alleles, storing in dict
   for i in range(n_primer_pairs):
-    di_fwd[i], di_rev[i] = get_primer_alt_frequencies(primer_df, gdna_pos, i, sample_set, assay_type, contig)
+    res_dict[i] = get_primer_alt_frequencies(primer_df, gdna_pos, i, sample_set, assay_type, contig)
 
   # Plot data
-  fig, ax = plt.subplots(n_primer_pairs , 2, figsize=[14, (n_primer_pairs*2)+2], constrained_layout=True)    
-  if assay_type == 'gDNA':
+  oligos, _ = return_oligo_list(assay_type)
+  fig, ax = plt.subplots(n_primer_pairs, len(oligos), figsize=[6*len(oligos), (n_primer_pairs*2)+2], constrained_layout=True)    
+  if any(item in assay_type for item in ['gDNA']):
     fig.suptitle(f"{name} primer pairs | {sample_set} | target {target_loc} bp", fontweight='bold')
-  elif assay_type == 'qPCR':
+  elif assay_type == 'probe':
+    fig.suptitle(f"{name} probe | {sample_set} | target {target_loc} bp", fontweight='bold')
+  elif assay_type == 'qPCR primers':
     fig.suptitle(f"{name} primer pairs | {sample_set} | target {transcript}", fontweight='bold')
 
   for i in range(n_primer_pairs):
-    plot_primer(primer_df, ax[i,0], i, di_fwd, assay_type, side='LEFT', exon_junctions=exon_junctions)
-    plot_primer(primer_df, ax[i,1], i, di_rev, assay_type, side='RIGHT', exon_junctions=exon_junctions)
+    plot_primer(primer_df, ax, i, res_dict, assay_type, exon_junctions=exon_junctions, target_loc=target_loc)
   if save: fig.savefig(f"{name}.{assay_type}.primers.png")
-  return(di_fwd, di_rev)
+  return(res_dict)
 
 
-def primer3_run_statistics(primer_dict):
-  primer_df = pd.DataFrame.from_dict(primer_dict.items())          # Convert the dict into a pandas dataframe
-  primer_df = primer_df.rename(columns={0:'parameter', 1:'value'}) # Rename the columns
-  explanations_df = primer_df.iloc[:7, :]                          # Take the first 7 rows which are general
-  for idx, row in explanations_df.iterrows():                      # Loop through each row and print information
-      print(row['parameter'], " : ", row['value'], "\n")
 
-def primer3_to_pandas(primer_dict):
-  primer_df = pd.DataFrame.from_dict(primer_dict.items())          # Convert the dict into a pandas dataframe
-  primer_df = primer_df.rename(columns={0:'parameter', 1:'value'}) # Rename the columns
-  # Create a column which is primer pair #, and a column for primer parameter which does not contain primer pair #
-  primer_df = primer_df.iloc[7:, :].copy()
-  primer_df['primer_pair'] = primer_df['parameter'].str.extract("([0-9][0-9]|[0-9])")
-  primer_df['parameter'] = primer_df['parameter'].str.replace("(_[0-9][0-9]|_[0-9])", "", regex=True)
 
-  # Put the different primer pairs in different columns
-  primer_df = primer_df.pivot(index='parameter', columns='primer_pair', values='value')
 
-  # Get a list of the rows we need 
-  primer_span = ['PRIMER_LEFT', 'PRIMER_RIGHT']
-  required_info = ['SEQUENCE', 'TM', 'GC_PERCENT']
-  required_info = [p + "_" + y for y in required_info for p in primer_span] + primer_span + ['PRIMER_PAIR_PRODUCT_SIZE']
 
-  # Subset data frame
-  primer_df = primer_df.loc[required_info, np.arange(primer_df.shape[1]).astype(str)]
-  return(primer_df)
+
+
+
+
+
 
 def get_gDNA_locs(gff, contig, start, end):
     locgff = gff.query("contig == @contig & type == 'exon' & start > @start & end < @end")
@@ -238,15 +320,19 @@ def get_qPCR_locs(gff, contig, transcript):
     genegff = gff.query("contig == @contig & type == 'gene' & start > @min_ & end < @max_")
     return(locgff, min_, max_, genegff)
 
-def plot_primer_locs(gff, contig, seq_parameters, n_primer_pairs, ax, di_fwd, di_rev, assay_type):
+
+
+def plot_primer_locs(gff, contig, seq_parameters, n_primer_pairs, ax, primer_res_dict, assay_type):
+    
+    oligos, _ = return_oligo_list(assay_type)
     # Load geneset (gff)
-    if assay_type == 'gDNA':
-      start = seq_parameters['GENOMIC_SEQUENCE_TARGET'] - 500
-      end = seq_parameters['GENOMIC_SEQUENCE_TARGET'] + 500
-      locgff, min_, max_, genegff = get_gDNA_locs(gff, contig, start, end)
-    elif assay_type == 'qPCR':
-      transcript = seq_parameters['TRANSCRIPT']
-      locgff, min_, max_, genegff = get_qPCR_locs(gff, contig, transcript)
+    if any(item in assay_type for item in ['gDNA', 'probe']):
+        start = seq_parameters['GENOMIC_SEQUENCE_TARGET'] - 500
+        end = seq_parameters['GENOMIC_SEQUENCE_TARGET'] + 500
+        locgff, min_, max_, genegff = get_gDNA_locs(gff, contig, start, end)
+    elif assay_type == 'qPCR primers':
+        transcript = seq_parameters['TRANSCRIPT']
+        locgff, min_, max_, genegff = get_qPCR_locs(gff, contig, transcript)
     # configure axes
     ax.set_xlim(min_, max_)
     ax.set_ylim(-0.5, 1.5)
@@ -258,7 +344,7 @@ def plot_primer_locs(gff, contig, seq_parameters, n_primer_pairs, ax, di_fwd, di
     ax.tick_params(axis='x', which='major', labelsize=13)
     ax.set_ylabel("Exons")
     ax.set_xlabel(f"Chromosome {contig} position", fontdict={'fontsize':14})
-    # Add rectangles for exons one at a time 
+    # Add rectangles for exons one at a time
     for _, exon in locgff.iterrows():
         start, end = exon[['start', 'end']]
         e_name = exon['Name'][-2:]
@@ -271,8 +357,8 @@ def plot_primer_locs(gff, contig, seq_parameters, n_primer_pairs, ax, di_fwd, di
             rect = patches.Rectangle((start, 0.45), end-start, -0.3, linewidth=3,
                                 edgecolor='none', facecolor="grey", alpha=0.9)
             ax.text((start+end)/2, 0.3, e_name)
-
         ax.add_patch(rect)
+
     for _, gene in genegff.iterrows():
         start, end = gene[['start', 'end']]
         size = end-start
@@ -291,14 +377,20 @@ def plot_primer_locs(gff, contig, seq_parameters, n_primer_pairs, ax, di_fwd, di
     pal = sns.color_palette("Set2", n_primer_pairs)
     handles, labels = ax.get_legend_handles_labels()
     for pair in range(n_primer_pairs):
-      lower_fwd, upper_fwd = di_fwd[pair]['position'].min() , di_fwd[pair]['position'].max()
-      lower_rev, upper_rev = di_rev[pair]['position'].min() , di_rev[pair]['position'].max()
+        for oligo in oligos:
+            lower, upper = primer_res_dict[pair][oligo]['position'].min() , primer_res_dict[pair][oligo]['position'].max()
 
-      plt.arrow(lower_fwd, 0.8+(2/(10-(pair))), upper_fwd-lower_fwd, 0, width=0.03, length_includes_head=True, color=pal[pair])
-      plt.arrow(upper_rev, 0.8+(2/(10-(pair))), lower_rev-upper_rev, 0, width=0.03, length_includes_head=True, color=pal[pair])
-      # manually define a new patch 
-      patch = patches.Patch(color=pal[pair], label=f'pair {pair}')
-      # handles is a list, so append manual patch
-      handles.append(patch) 
+            if oligo == 'LEFT':
+                plt.arrow(lower, 0.8+(2/(10-(pair))), upper-lower, 0, width=0.03, length_includes_head=True, color=pal[pair])
+            elif oligo == 'RIGHT':
+                plt.arrow(upper, 0.8+(2/(10-(pair))), lower-upper, 0, width=0.03, length_includes_head=True, color=pal[pair])
+            elif oligo == 'INTERNAL':
+                ax.axhline(y=0.8+(2/(10-(pair))), xmin=lower, xmax=upper)
+                line = plt.Line2D((lower, upper), (0.8+(2/(10-(pair))), 0.8+(2/(10-(pair)))), lw=2.5, color=pal[pair])
+                ax.add_line(line)
+        # manually define a new patch 
+        patch = patches.Patch(color=pal[pair], label=f'pair {pair}')
+        # handles is a list, so append manual patch
+        handles.append(patch) 
     # plot the legend
     plt.legend(handles=handles, loc='best')
