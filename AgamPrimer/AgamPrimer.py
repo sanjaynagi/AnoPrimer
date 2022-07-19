@@ -260,7 +260,6 @@ def plot_primer(primer_df, ax, i, res_dict, assay_type, exon_junctions=None, tar
     elif oligo == 'INTERNAL':
       axes.set_title(f"Probe {i}")
       idx = np.where(res_dict[i][oligo]['position'] == target_loc)[0][0]
-      print(idx)
       plt.setp(axes.get_xticklabels()[idx], backgroundcolor="antiquewhite")
     plot_pair_text(primer_df, i, axes, oligo, res_dict)
   
