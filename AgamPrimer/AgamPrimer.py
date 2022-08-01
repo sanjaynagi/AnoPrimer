@@ -1,3 +1,5 @@
+from curses import meta
+from random import sample
 import pandas as pd 
 import allel 
 import numpy as np
@@ -153,13 +155,18 @@ def consecutive(data, stepsize=1):
     arr = [[a.min(), a.max()] for a in arr]
     return (arr)
 
+def query_genotypes(geno, sample_set, sample_query):
+  metadata = ag3.sample_metadata(sample_set)
+  bool_ = metadata.eval(sample_query)
+  return(geno.compress(bool_, axis=1))
 
-def get_primer_arrays(contig, gdna_pos, sample_set, assay_type):
+
+def get_primer_arrays(contig, gdna_pos, sample_set, assay_type, sample_query=None):
 
   if any(item in assay_type for item in ['gDNA', 'probe']):
     span_str=f'{contig}:{gdna_pos.min()}-{gdna_pos.max()}'                        
     ref_arr = ag3.genome_sequence(region=span_str).compute().astype(str)     # get dna sequence for span
-    geno = ag3.snp_genotypes(region=span_str, sample_sets=sample_set).compute() # get genotypes
+    geno = ag3.snp_genotypes(region=span_str, sample_sets=sample_set, sample_query=sample_query).compute() # get genotypes
     freqs = allel.GenotypeArray(geno).count_alleles().to_frequencies()                                # calculate allele frequencies
     freq_arr = freqs[:, 1:].sum(axis=1)
     pos_arr = gdna_pos
@@ -171,7 +178,7 @@ def get_primer_arrays(contig, gdna_pos, sample_set, assay_type):
     for span in exon_spans:
       span_str = f'{contig}:{span[0]}-{span[1]}'                        
       primer_ref_seq = ag3.genome_sequence(region=span_str).compute().astype(str)     # get dna sequence for span
-      geno = ag3.snp_genotypes(region=span_str, sample_sets=sample_set).compute() # get genotypes
+      geno = ag3.snp_genotypes(region=span_str, sample_sets=sample_set).compute()     # get genotypes
       freqs = allel.GenotypeArray(geno).count_alleles().to_frequencies()                                # calculate allele frequencies
       freq_arr = np.append(freq_arr, freqs[:, 1:].sum(axis=1))
       ref_arr = np.append(ref_arr, primer_ref_seq)
@@ -180,14 +187,14 @@ def get_primer_arrays(contig, gdna_pos, sample_set, assay_type):
   return(freq_arr, ref_arr, pos_arr)
 
 
-def get_primer_alt_frequencies(primer_df, gdna_pos, pair, sample_set, assay_type, contig):
+def get_primer_alt_frequencies(primer_df, gdna_pos, pair, sample_set, assay_type, contig, sample_query):
   """
   Find the genomic locations of pairs of primers, and runs span_to_freq
   to get allele frequencies at those locations
   """
 
   oligos, _ = return_oligo_list(assay_type)
-  freq_arr, ref_arr, pos_arr = get_primer_arrays(contig=contig, gdna_pos=gdna_pos, sample_set=sample_set, assay_type=assay_type)
+  freq_arr, ref_arr, pos_arr = get_primer_arrays(contig=contig, gdna_pos=gdna_pos, sample_set=sample_set, assay_type=assay_type, sample_query)
 
   di = {}
   for oligo in oligos:
@@ -264,10 +271,14 @@ def plot_primer(primer_df, ax, i, res_dict, assay_type, exon_junctions=None, tar
     plot_pair_text(primer_df, i, axes, oligo, res_dict)
   
 
-def plot_primer_ag3_frequencies(primer_df, gdna_pos, contig, sample_set, assay_type, seq_parameters, save=True):
+def plot_primer_ag3_frequencies(primer_df, gdna_pos, contig, sample_set, assay_type, seq_parameters, save=True, sample_query=None):
   """
   Loop through n primer pairs, retrieving frequency data and plot allele frequencies
   """
+
+  if sample_query != None:
+    print(f"Subsetting allele frequencies to {sample_query}")
+
   n_primer_pairs=len(primer_df.columns)
   name = seq_parameters['SEQUENCE_ID']
   exon_junctions = seq_parameters['SEQUENCE_OVERLAP_JUNCTION_LIST'] if assay_type == 'qPCR primers' else None
@@ -276,7 +287,7 @@ def plot_primer_ag3_frequencies(primer_df, gdna_pos, contig, sample_set, assay_t
   res_dict = {}
   # Loop through each primer pair and get the frequencies of alternate alleles, storing in dict
   for i in range(n_primer_pairs):
-    res_dict[i] = get_primer_alt_frequencies(primer_df, gdna_pos, i, sample_set, assay_type, contig)
+    res_dict[i] = get_primer_alt_frequencies(primer_df, gdna_pos, i, sample_set, assay_type, contig, sample_query)
 
   # Plot data
   oligos, _ = return_oligo_list(assay_type)
@@ -292,10 +303,6 @@ def plot_primer_ag3_frequencies(primer_df, gdna_pos, contig, sample_set, assay_t
     plot_primer(primer_df, ax, i, res_dict, assay_type, exon_junctions=exon_junctions, target_loc=target_loc)
   if save: fig.savefig(f"{name}.{assay_type}.primers.png")
   return(res_dict)
-
-
-
-
 
 
 
