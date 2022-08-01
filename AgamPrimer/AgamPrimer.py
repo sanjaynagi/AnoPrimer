@@ -194,7 +194,7 @@ def get_primer_alt_frequencies(primer_df, gdna_pos, pair, sample_set, assay_type
   """
 
   oligos, _ = return_oligo_list(assay_type)
-  freq_arr, ref_arr, pos_arr = get_primer_arrays(contig=contig, gdna_pos=gdna_pos, sample_set=sample_set, assay_type=assay_type, sample_query)
+  freq_arr, ref_arr, pos_arr = get_primer_arrays(contig=contig, gdna_pos=gdna_pos, sample_set=sample_set, assay_type=assay_type, sample_query=sample_query)
 
   di = {}
   for oligo in oligos:
