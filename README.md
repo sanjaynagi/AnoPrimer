@@ -12,6 +12,7 @@ Primer Design in *Anopheles gambiae s.l* taking into account SNP variation in pr
 
 #### Release notes
 
+- 0.3.4 - Fix bug in get_gDNA_sequence() and in plot_primer_locs() 
 - 0.3.3 - Introduced feature to enable a sample query (e.g subset to a specific species within a cohort)
 - 0.3.2 - minor fix to remove printing of variable in `plot_primer_ag3_frequencies()`
 - 0.3.1 - minor fix to bug introduced in 0.3.0 to `plot_primer()` function 
