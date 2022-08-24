@@ -5,10 +5,10 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="AgamPrimer",
-    version="0.3.2",
+    version="0.4.2",
     author="Sanjay Curtis Nagi",
     author_email="sanjay.c.nagi@gmail.com",
-    description="A small package to store some functions for the PrimerDesignAg notebook, to improve readability.",
+    description="A small package to store some functions for the the AgamPrimer notebook, to improve readability.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/sanjaynagi/AgamPrimer",
@@ -23,4 +23,3 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     python_requires=">=3.6",
 )
-3

@@ -1,5 +1,3 @@
-from curses import meta
-from random import sample
 import pandas as pd 
 import allel 
 import numpy as np
@@ -8,9 +6,11 @@ import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib import patches
 import malariagen_data
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+import kaleido
 
 ag3 = malariagen_data.Ag3()
-
 
 def prepare_gDNA_sequence(target_loc, amplicon_size_range, genome_seq, assay_name, assay_type, probe_exclude_region_size=16):
     """
@@ -18,7 +18,7 @@ def prepare_gDNA_sequence(target_loc, amplicon_size_range, genome_seq, assay_nam
     """
     # Set up range for the input sequence, we'll take the middle range of the amplicon size and add that either
     # side of the target SNP
-    amp_size_range = amplicon_size_range[0][1]-amplicon_size_range[0][0]
+    amp_size_range = int(np.mean(amplicon_size_range)) 
     start = target_loc - amp_size_range
     end = target_loc + amp_size_range
     # join array into be one character string, and store the positions of these sequences for later
@@ -112,7 +112,6 @@ def return_oligo_list(assay_type):
 def primer3_to_pandas(primer_dict, assay_type):
 
     oligos, row_start = return_oligo_list(assay_type)
-    print(row_start)
 
     primer_df = pd.DataFrame.from_dict(primer_dict.items())          # Convert the dict into a pandas dataframe
     primer_df = primer_df.rename(columns={0:'parameter', 1:'value'}) # Rename the columns
@@ -145,7 +144,18 @@ def primer3_to_pandas(primer_dict, assay_type):
 
 ##### PLOTTING
 
-  
+def complement(x):
+  if x == 'A':
+    return("T")
+  elif x == 'C':
+    return("G")
+  elif x == 'G':
+    return("C")
+  elif x == 'T':
+    return("A")
+
+complement = np.vectorize(complement)
+
 def rev_complement(seq):
     BASES ='NRWSMBDACGTHVKSWY'
     return ''.join([BASES[-j] for j in [BASES.find(i) for i in seq][::-1]])
@@ -154,37 +164,53 @@ def consecutive(data, stepsize=1):
     arr = np.split(data, np.where(np.diff(data) != stepsize)[0]+1)
     arr = [[a.min(), a.max()] for a in arr]
     return (arr)
+  
+def addZeroCols(freqs):
+  freqlength = freqs.shape[1]
+  needed = 4-freqlength
+  if needed > 0:
+    for i in range(needed):
+      freqs = np.column_stack([freqs, np.repeat(0, freqs.shape[0])])
+  return(freqs)
 
-def query_genotypes(geno, sample_set, sample_query):
-  metadata = ag3.sample_metadata(sample_set)
-  bool_ = metadata.eval(sample_query)
-  return(geno.compress(bool_, axis=1))
-
+def get_base_freqs(freqs, ref_alt_array):
+  assert freqs.shape == ref_alt_array.shape, "Shape of arrays is different"
+  freq_df = pd.DataFrame(ref_alt_array)
+  for i_base in range(4):
+    for i in range(freqs.shape[0]):
+      base = ref_alt_array[i, i_base]
+      freq_df.loc[i, f'{base}_freq'] = freqs[i, i_base]
+  return(freq_df)
 
 def get_primer_arrays(contig, gdna_pos, sample_set, assay_type, sample_query=None):
 
   if any(item in assay_type for item in ['gDNA', 'probe']):
     span_str=f'{contig}:{gdna_pos.min()}-{gdna_pos.max()}'                        
-    ref_arr = ag3.genome_sequence(region=span_str).compute().astype(str)     # get dna sequence for span
-    geno = ag3.snp_genotypes(region=span_str, sample_sets=sample_set, sample_query=sample_query).compute() # get genotypes
-    freqs = allel.GenotypeArray(geno).count_alleles().to_frequencies()                                # calculate allele frequencies
-    freq_arr = freqs[:, 1:].sum(axis=1)
+    snps = ag3.snp_calls(region=span_str, sample_sets=sample_set)     # get genotypes
+    ref_alt_arr = snps['variant_allele']
+    geno = snps['call_genotype']
+    freq_arr = allel.GenotypeArray(geno).count_alleles().to_frequencies() 
     pos_arr = gdna_pos
   elif assay_type == 'qPCR primers':
-    freq_arr = np.array([])
-    ref_arr = np.array([])
+    freq_arr = []
+    ref_alt_arr = []
     pos_arr = np.array([])
-    exon_spans = np.array(consecutive(gdna_pos)) +1
+    exon_spans = np.array(consecutive(gdna_pos)) + 1
     for span in exon_spans:
       span_str = f'{contig}:{span[0]}-{span[1]}'                        
-      primer_ref_seq = ag3.genome_sequence(region=span_str).compute().astype(str)     # get dna sequence for span
-      geno = ag3.snp_genotypes(region=span_str, sample_sets=sample_set).compute()     # get genotypes
+      snps = ag3.snp_calls(region=span_str, sample_sets=sample_set)     # get genotypes
+      ref_alts = snps['variant_allele']
+      geno = snps['call_genotype']
       freqs = allel.GenotypeArray(geno).count_alleles().to_frequencies()                                # calculate allele frequencies
-      freq_arr = np.append(freq_arr, freqs[:, 1:].sum(axis=1))
-      ref_arr = np.append(ref_arr, primer_ref_seq)
+      freqs = addZeroCols(freqs)
+      freq_arr.append(freqs)
+      ref_alt_arr.append(ref_alts)
       pos_arr = np.append(pos_arr, np.arange(span[0], span[1]+1).astype(int))
+    freq_arr = np.concatenate(freq_arr)
+    ref_alt_arr = np.concatenate(ref_alt_arr)
 
-  return(freq_arr, ref_arr, pos_arr)
+  return(freq_arr, ref_alt_arr.astype('U13'), pos_arr)
+
 
 
 def get_primer_alt_frequencies(primer_df, gdna_pos, pair, sample_set, assay_type, contig, sample_query):
@@ -194,7 +220,9 @@ def get_primer_alt_frequencies(primer_df, gdna_pos, pair, sample_set, assay_type
   """
 
   oligos, _ = return_oligo_list(assay_type)
-  freq_arr, ref_arr, pos_arr = get_primer_arrays(contig=contig, gdna_pos=gdna_pos, sample_set=sample_set, assay_type=assay_type, sample_query=sample_query)
+  base_freqs, ref_alt_arr, pos_arr = get_primer_arrays(contig=contig, gdna_pos=gdna_pos, sample_set=sample_set, assay_type=assay_type, sample_query=sample_query)
+
+  freq_arr = base_freqs[:, 1:].sum(axis=1)
 
   di = {}
   for oligo in oligos:
@@ -203,73 +231,99 @@ def get_primer_alt_frequencies(primer_df, gdna_pos, pair, sample_set, assay_type
     primer_size = primer_df.loc[f'PRIMER_{oligo}', str(pair)][1]
     if oligo in ['LEFT', 'INTERNAL']:
       freq = freq_arr[primer_loc:primer_loc+primer_size]
-      ref = ref_arr[primer_loc:primer_loc+primer_size]
+      base_freqs_arr = base_freqs[primer_loc:primer_loc+primer_size, :]
+      ref = ref_alt_arr[primer_loc:primer_loc+primer_size, 0].compute().values
+      ref_alt = ref_alt_arr[primer_loc:primer_loc+primer_size, :].compute().values
       pos = pos_arr[primer_loc:primer_loc+primer_size]
     elif oligo == 'RIGHT':
       freq = np.flip(freq_arr[primer_loc-primer_size:primer_loc])
-      ref = ref_arr[primer_loc-primer_size:primer_loc]
+      base_freqs_arr = base_freqs[primer_loc-primer_size:primer_loc, :]
+      base_freqs_arr = np.flip(base_freqs_arr, axis=0)
+      ref = ref_alt_arr[primer_loc-primer_size:primer_loc, 0].compute().values
       ref = np.array(list(rev_complement(''.join(ref))), dtype=str)
+      ref_alt = ref_alt_arr[primer_loc-primer_size:primer_loc, :].compute().values
+      ref_alt = complement(np.flip(ref_alt, axis=0))
       pos = np.flip(pos_arr[primer_loc-primer_size:primer_loc])
 
     df = pd.DataFrame({'position': pos, 'base':ref, 'alt_frequency':freq}) # Make dataframe for plotting
     df['base_pos'] = df['base'] + "_" + df['position'].astype(str)
     assert df.shape[0] == primer_size, "Wrong size primers"
+
+    freq_df = get_base_freqs(addZeroCols(base_freqs_arr), ref_alt).filter(like='freq')
+    df = pd.concat([df, freq_df], axis=1)
     di[oligo] = df
   return(di)
 
-def plot_pair_text(primer_df, pair, ax, oligo, res_dict):
-  """
-  Plot text relating to primer characteristics (Tm etc)
-  """
-  tm = np.round(primer_df.loc[f'PRIMER_{oligo}_TM', str(pair)], 2)       
-  gc = np.round(primer_df.loc[f'PRIMER_{oligo}_GC_PERCENT', str(pair)], 2)
-  span = f"{int(res_dict[pair][oligo]['position'].min())}-{int(res_dict[pair][oligo]['position'].max())}"
-  # Write text to plot for Tm, GC, span, and 3/5'
-  ax.text(x=2, y=0.5, s=f"TM={tm}", bbox=dict(facecolor='white', edgecolor='black', alpha=0.4, boxstyle='round', pad=0.5))
-  ax.text(x=2, y=0.7, s=f"GC={gc}", bbox=dict(facecolor='white', edgecolor='black', alpha=0.4, boxstyle='round', pad=0.5))
-  ax.text(x=2, y=0.9, s=span, bbox=dict(facecolor='white', edgecolor='black', alpha=0.4, boxstyle='round', pad=0.5))
-  ax.text(x=0.5, y=0.9, s="5'")
-  ax.text(x=18, y=0.9, s="3'")
 
-def plot_primer(primer_df, ax, i, res_dict, assay_type, exon_junctions=None, target_loc=None):
-  """
-  Plot primer allele frequencies and text
-  """
+
+def plotly_primers(primer_df, res_dict, name, assay_type, n_primer_pairs, sample_set, target_loc, transcript, save=True):
+
   oligos, _ = return_oligo_list(assay_type)
+  if len(oligos) == 2:
+    plt_title = ['Forward primer', 'Reverse primer']
+  elif len(oligos) == 3:
+    plt_title = ['Forward primer', 'Reverse primer', 'Probe']
+  title_list = []
+  for i in range(n_primer_pairs):
+      for oligo in plt_title:
+        title_list.append(f"{oligo} {i}")
 
+  hover_template = "<br>".join(["Base / Position: %{customdata[4]}",
+                                              "Total Alternate freq: %{y}",
+                                              "A_freq: %{customdata[0]}",
+                                              "C_freq: %{customdata[1]}",
+                                              "G_freq: %{customdata[2]}",
+                                              "T_freq: %{customdata[3]}"])
+                              
+  fig = make_subplots(rows=n_primer_pairs, cols=len(oligos), subplot_titles=title_list, horizontal_spacing = 0.03, vertical_spacing=0.05)
   for idx, oligo in enumerate(oligos):
-    if len(oligos) > 1:
-      axes = ax[i, idx]
-    else:
-      axes = ax[i]
+    idx = idx+1
+    for i in range(n_primer_pairs):
+      row_i = i+1
 
-    sns.scatterplot(ax=axes, x=res_dict[i][oligo]['base_pos'], y=res_dict[i][oligo]['alt_frequency'], s=200) 
-    axes.set_xticklabels(res_dict[i][oligo]['base'])
-    axes.set_ylim(0,1)
-    axes.set_xlabel("")
-    axes.set_ylabel("Alternate allele frequency")
-    if idx > 0: 
-      axes.set_ylabel("")
-      axes.set_yticklabels("")
+      color = [-1 if v == 0 else 1 if v > 0 else 0 for v in res_dict[i][oligo]['alt_frequency']]
+      colorscale = [[0, 'lightgray'], [0.5, 'lightgray'], [1, 'dodgerblue']]
 
-    if assay_type == 'qPCR primers':
-      a = primer_df.loc[f'PRIMER_{oligo}', str(i)]
-      a = a[0] - a[1] if oligo == 'RIGHT' else a[0] + a[1]
-      arr = np.array(exon_junctions) - a
-      if (np.abs(arr) < 18).any():
-        bases_in_new_exon  = arr[np.abs(arr) < 18]
-        plt.setp(axes.get_xticklabels()[bases_in_new_exon[0]:], backgroundcolor="antiquewhite") if oligo == 'RIGHT' else plt.setp(axes.get_xticklabels()[:bases_in_new_exon[0]], backgroundcolor="antiquewhite")
-    
-    if oligo == 'LEFT':
-      axes.set_title(f"Forward primer {i}") 
-    elif oligo == 'RIGHT':
-      axes.set_title(f"Reverse primer {i}")
-    elif oligo == 'INTERNAL':
-      axes.set_title(f"Probe {i}")
-      idx = np.where(res_dict[i][oligo]['position'] == target_loc)[0][0]
-      plt.setp(axes.get_xticklabels()[idx], backgroundcolor="antiquewhite")
-    plot_pair_text(primer_df, i, axes, oligo, res_dict)
-  
+      tm = np.round(primer_df.loc[f'PRIMER_{oligo}_TM', str(i)], 2)       
+      gc = np.round(primer_df.loc[f'PRIMER_{oligo}_GC_PERCENT', str(i)], 2)
+      span = f"{int(res_dict[i][oligo]['position'].min())}-{int(res_dict[i][oligo]['position'].max())}"
+      # Write text to plot for Tm, GC, span, and 3/5'
+
+      fig.add_trace(go.Scatter(x=res_dict[i][oligo]['base_pos'], 
+                              y=res_dict[i][oligo]['alt_frequency'], customdata=res_dict[i][oligo][['A_freq', 'C_freq', 'G_freq', 'T_freq', 'base_pos']], 
+                              hovertemplate=hover_template,
+                              mode='markers', marker=dict(size=14, color=color, colorscale=colorscale, line=dict(width=2, color='black')), marker_symbol='circle'), row=row_i, col=idx)
+      fig.add_annotation(row=row_i, col=idx, x=res_dict[i][oligo]['base_pos'][0], y=0.8, text="5'", showarrow=False)
+      fig.add_annotation(row=row_i, col=idx, x=res_dict[i][oligo]['base_pos'].to_numpy()[-1], y=0.8, text="3'", showarrow=False)
+      fig.add_annotation(row=row_i, col=idx, x=res_dict[i][oligo]['base_pos'].to_numpy()[4], y=0.92, text=span, showarrow=False)
+      fig.add_annotation(row=row_i, col=idx, x=res_dict[i][oligo]['base_pos'].to_numpy()[-7], y=0.92, text=f"GC={gc}", showarrow=False)
+      fig.add_annotation(row=row_i, col=idx, x=res_dict[i][oligo]['base_pos'].to_numpy()[-3], y=0.92, text=f"TM={tm}", showarrow=False)
+      
+      fig.update_xaxes(row=row_i, col=idx, tickmode = 'array', tickvals = res_dict[i][oligo]['base_pos'], ticktext=res_dict[i][oligo]['base'], tickangle=0, mirror=True)
+      if idx > 1:
+        fig.update_yaxes(row=row_i, col=idx, range=[0,1], tickvals=np.arange(0, 1, 0.2), showticklabels=False, mirror=True)
+      else:
+        fig.update_yaxes(row=row_i, col=idx, tickvals=np.arange(0, 1, 0.2), range=[0,1], mirror=True)
+
+      if ((row_i % 2) == 0) & (idx == 1):
+        fig.update_yaxes(row=row_i, col=idx, title='Alternate allele frequency')
+
+  if any(item in assay_type for item in ['gDNA']):
+    title_text = f"{name} primer pairs | {sample_set} | target {target_loc} bp"
+  elif assay_type == 'probe':
+    title_text = f"{name} probe | {sample_set} | target {target_loc} bp"
+  elif assay_type == 'qPCR primers':
+      title_text = f"{name} primer pairs | {sample_set} | target {transcript}"
+
+  #fig.update_traces(customdata=customdata, hovertemplate=hovertemplate)
+  fig.update_layout(height=200*n_primer_pairs, width=600*len(oligos),
+                      title_text=title_text, title_x = 0.5, template="simple_white", showlegend=False)
+  if save:
+    fig.write_html(f"{name}_{assay_type}.html")
+    fig.write_image(f"{name}_{assay_type}.pdf")
+  fig.show()
+
+
 
 def plot_primer_ag3_frequencies(primer_df, gdna_pos, contig, sample_set, assay_type, seq_parameters, save=True, sample_query=None):
   """
@@ -288,20 +342,10 @@ def plot_primer_ag3_frequencies(primer_df, gdna_pos, contig, sample_set, assay_t
   # Loop through each primer pair and get the frequencies of alternate alleles, storing in dict
   for i in range(n_primer_pairs):
     res_dict[i] = get_primer_alt_frequencies(primer_df, gdna_pos, i, sample_set, assay_type, contig, sample_query)
+  
+  # Plot data with plotly
+  plotly_primers(primer_df=primer_df, res_dict=res_dict, name=name, assay_type=assay_type, n_primer_pairs=n_primer_pairs, sample_set=sample_set, target_loc=target_loc, transcript=transcript, save=save)
 
-  # Plot data
-  oligos, _ = return_oligo_list(assay_type)
-  fig, ax = plt.subplots(n_primer_pairs, len(oligos), figsize=[6*len(oligos), (n_primer_pairs*2)+2], constrained_layout=True)    
-  if any(item in assay_type for item in ['gDNA']):
-    fig.suptitle(f"{name} primer pairs | {sample_set} | target {target_loc} bp", fontweight='bold')
-  elif assay_type == 'probe':
-    fig.suptitle(f"{name} probe | {sample_set} | target {target_loc} bp", fontweight='bold')
-  elif assay_type == 'qPCR primers':
-    fig.suptitle(f"{name} primer pairs | {sample_set} | target {transcript}", fontweight='bold')
-
-  for i in range(n_primer_pairs):
-    plot_primer(primer_df, ax, i, res_dict, assay_type, exon_junctions=exon_junctions, target_loc=target_loc)
-  if save: fig.savefig(f"{name}.{assay_type}.primers.png")
   return(res_dict)
 
 
@@ -312,10 +356,10 @@ def plot_primer_ag3_frequencies(primer_df, gdna_pos, contig, sample_set, assay_t
 
 
 def get_gDNA_locs(gff, contig, start, end):
-    locgff = gff.query("contig == @contig & type == 'exon' & start > @start & end < @end")
+    locgff = gff.query("contig == @contig & type == 'exon' & start < @end & end > @start")
     min_= locgff.start.min() - 100
     max_ = locgff.end.max() + 100
-    genegff = gff.query("contig == @contig & type == 'gene' & start > @min_ & end < @max_")
+    genegff = gff.query("contig == @contig & type == 'gene' & start < @end & end > @start")
     return(locgff, min_, max_, genegff)
 
 def get_qPCR_locs(gff, contig, transcript):
@@ -327,8 +371,7 @@ def get_qPCR_locs(gff, contig, transcript):
     return(locgff, min_, max_, genegff)
 
 
-
-def plot_primer_locs(gff, contig, seq_parameters, n_primer_pairs, ax, primer_res_dict, assay_type):
+def plot_primer_locs(gff, contig, seq_parameters, n_primer_pairs, primer_res_dict, assay_type, legend_loc='best'):
     
     oligos, _ = return_oligo_list(assay_type)
     # Load geneset (gff)
@@ -336,9 +379,13 @@ def plot_primer_locs(gff, contig, seq_parameters, n_primer_pairs, ax, primer_res
         start = seq_parameters['GENOMIC_SEQUENCE_TARGET'] - 500
         end = seq_parameters['GENOMIC_SEQUENCE_TARGET'] + 500
         locgff, min_, max_, genegff = get_gDNA_locs(gff, contig, start, end)
+        min_ = np.min([min_, start])
+        max_ = np.max([max_, end])
     elif assay_type == 'qPCR primers':
         transcript = seq_parameters['TRANSCRIPT']
         locgff, min_, max_, genegff = get_qPCR_locs(gff, contig, transcript)
+
+    fig, ax = plt.subplots(1,1, figsize=[16,4])
     # configure axes
     ax.set_xlim(min_, max_)
     ax.set_ylim(-0.5, 1.5)
@@ -352,32 +399,34 @@ def plot_primer_locs(gff, contig, seq_parameters, n_primer_pairs, ax, primer_res
     ax.set_xlabel(f"Chromosome {contig} position", fontdict={'fontsize':14})
     # Add rectangles for exons one at a time
     for _, exon in locgff.iterrows():
-        start, end = exon[['start', 'end']]
+        ex_start, ex_end = exon[['start', 'end']]
         e_name = exon['Name'][-2:]
         strand = exon['strand']
         if strand == '+':
-            rect = patches.Rectangle((start, 0.55), end-start, 0.3, linewidth=3,
+            rect = patches.Rectangle((ex_start, 0.55), ex_end-ex_start, 0.3, linewidth=3,
                                 edgecolor='none', facecolor="grey", alpha=0.9)
-            ax.text((start+end)/2, 0.65, e_name)
+            ax.text((ex_start+ex_end)/2, 0.65, e_name)
         else:
-            rect = patches.Rectangle((start, 0.45), end-start, -0.3, linewidth=3,
+            rect = patches.Rectangle((ex_start, 0.45), ex_end-ex_start, -0.3, linewidth=3,
                                 edgecolor='none', facecolor="grey", alpha=0.9)
-            ax.text((start+end)/2, 0.3, e_name)
+            ax.text((ex_start+ex_end)/2, 0.3, e_name)
         ax.add_patch(rect)
 
-    for _, gene in genegff.iterrows():
+    tot_genes = genegff.shape[0]
+    for i, gene in genegff.reset_index(drop=True).iterrows():
         start, end = gene[['start', 'end']]
-        size = end-start
-        corr = size/4
+        diff = np.diff([min_, max_])
+        interval = diff/tot_genes+1
+        name_point = min_ + (interval*i+1)
         strand = gene['strand']
         if strand == '+':
             rect = patches.Rectangle((start, 0.55), end-start, 0.3, linewidth=3,
                                 edgecolor='black', facecolor="none")
-            ax.text(((start+end)/2)-corr, 0.95, s=gene['ID'], fontdict= {'fontsize':12}, weight='bold')
+            ax.text(name_point, 0.95, s=gene['ID'], fontdict= {'fontsize':12}, weight='bold')
         else:
             rect = patches.Rectangle((start, 0.45), end-start, -0.3, linewidth=3,
                                 edgecolor='black', facecolor="none")
-            ax.text(((start+end)/2)-corr,  -0.3, s=gene['ID'], fontdict= {'fontsize':12},  weight='bold')
+            ax.text(name_point,  -0.3, s=gene['ID'], fontdict= {'fontsize':12},  weight='bold')
         ax.add_patch(rect)
 
     pal = sns.color_palette("Set2", n_primer_pairs)
@@ -399,4 +448,81 @@ def plot_primer_locs(gff, contig, seq_parameters, n_primer_pairs, ax, primer_res
         # handles is a list, so append manual patch
         handles.append(patch) 
     # plot the legend
-    plt.legend(handles=handles, loc='best')
+    plt.legend(handles=handles, loc=legend_loc)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#def plot_primer(primer_df, ax, i, res_dict, assay_type, exon_junctions=None, target_loc=None):
+#   """
+#   Plot primer allele frequencies and text
+#   """
+#   oligos, _ = return_oligo_list(assay_type)
+
+#   for idx, oligo in enumerate(oligos):
+#     if len(oligos) > 1:
+#       axes = ax[i, idx]
+#     else:
+#       axes = ax[i]
+
+#     sns.scatterplot(ax=axes, x=res_dict[i][oligo]['base_pos'], y=res_dict[i][oligo]['alt_frequency'], s=200) 
+#     axes.set_xticklabels(res_dict[i][oligo]['base'])
+#     axes.set_ylim(0,1)
+#     axes.set_xlabel("")
+#     axes.set_ylabel("Alternate allele frequency")
+#     if idx > 0: 
+#       axes.set_ylabel("")
+#       axes.set_yticklabels("")
+
+#     if assay_type == 'qPCR primers':
+#       a = primer_df.loc[f'PRIMER_{oligo}', str(i)]
+#       a = a[0] - a[1] if oligo == 'RIGHT' else a[0] + a[1]
+#       arr = np.array(exon_junctions) - a
+#       if (np.abs(arr) < 18).any():
+#         bases_in_new_exon  = arr[np.abs(arr) < 18]
+#         plt.setp(axes.get_xticklabels()[bases_in_new_exon[0]:], backgroundcolor="antiquewhite") if oligo == 'RIGHT' else plt.setp(axes.get_xticklabels()[:bases_in_new_exon[0]], backgroundcolor="antiquewhite")
+    
+#     if oligo == 'LEFT':
+#       axes.set_title(f"Forward primer {i}") 
+#     elif oligo == 'RIGHT':
+#       axes.set_title(f"Reverse primer {i}")
+#     elif oligo == 'INTERNAL':
+#       axes.set_title(f"Probe {i}")
+#       idx = np.where(res_dict[i][oligo]['position'] == target_loc)[0][0]
+#       plt.setp(axes.get_xticklabels()[idx], backgroundcolor="antiquewhite")
+#     plot_pair_text(primer_df, i, axes, oligo, res_dict)
+
+
+# def plot_pair_text(primer_df, pair, ax, oligo, res_dict):
+#   """
+#   Plot text relating to primer characteristics (Tm etc)
+#   """
+#   tm = np.round(primer_df.loc[f'PRIMER_{oligo}_TM', str(pair)], 2)       
+#   gc = np.round(primer_df.loc[f'PRIMER_{oligo}_GC_PERCENT', str(pair)], 2)
+#   span = f"{int(res_dict[pair][oligo]['position'].min())}-{int(res_dict[pair][oligo]['position'].max())}"
+#   # Write text to plot for Tm, GC, span, and 3/5'
+#   ax.text(x=2, y=0.5, s=f"TM={tm}", bbox=dict(facecolor='white', edgecolor='black', alpha=0.4, boxstyle='round', pad=0.5))
+#   ax.text(x=2, y=0.7, s=f"GC={gc}", bbox=dict(facecolor='white', edgecolor='black', alpha=0.4, boxstyle='round', pad=0.5))
+#   ax.text(x=2, y=0.9, s=span, bbox=dict(facecolor='white', edgecolor='black', alpha=0.4, boxstyle='round', pad=0.5))
+#   ax.text(x=0.5, y=0.9, s="5'")
+#   ax.text(x=18, y=0.9, s="3'")
