@@ -316,7 +316,7 @@ def plotly_primers(primer_df, res_dict, name, assay_type, n_primer_pairs, sample
       title_text = f"{name} primer pairs | {sample_set} | target {transcript}"
 
   #fig.update_traces(customdata=customdata, hovertemplate=hovertemplate)
-  fig.update_layout(height=200*n_primer_pairs, width=600*len(oligos),
+  fig.update_layout(height=150*n_primer_pairs, width=500*len(oligos),
                       title_text=title_text, title_x = 0.5, template="simple_white", showlegend=False)
   if save:
     fig.write_html(f"{name}_{assay_type}.html")
