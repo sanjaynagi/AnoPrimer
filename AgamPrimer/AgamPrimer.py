@@ -8,6 +8,7 @@ import malariagen_data
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import gget
+import primer3
 
 ag3 = malariagen_data.Ag3()
 
@@ -88,7 +89,7 @@ def primer_params(primer_parameters, assay_type):
 
 def primer3_run_statistics(primer_dict, assay_type):
     _, row_start = return_oligo_list(assay_type)
-
+    primer_dict = convert_results_dict_naming(primer_dict)
     primer_df = pd.DataFrame.from_dict(primer_dict.items())          # Convert the dict into a pandas dataframe
     primer_df = primer_df.rename(columns={0:'parameter', 1:'value'}) # Rename the columns
     explanations_df = primer_df.iloc[:row_start, :]         # Take the first 7 rows which are general
@@ -98,20 +99,37 @@ def primer3_run_statistics(primer_dict, assay_type):
 
 def return_oligo_list(assay_type):
     if assay_type == 'probe':
-        oligos = ['INTERNAL']
+        oligos = ['probe']
         row_start = 5
     elif any(item == assay_type for item in ['gDNA primers', 'qPCR primers']):
-        oligos = ['LEFT', 'RIGHT']
+        oligos = ['forward', 'reverse']
         row_start = 7
     elif assay_type == 'gDNA primers + probe':
-        oligos = ['LEFT', 'RIGHT', 'INTERNAL']
+        oligos = ['forward', 'reverse', 'probe']
         row_start = 8
     return(oligos, row_start)
+
+def convert_results_dict_naming(primer_dict):
+
+    k = {}
+    for key in primer_dict.keys():
+        if 'LEFT' in key:
+            nkey = key.replace("LEFT", 'forward')
+        elif 'RIGHT' in key:
+            nkey = key.replace("RIGHT", 'reverse')
+        elif 'INTERNAL' in key:
+            nkey = key.replace("INTERNAL", 'probe')
+        else:
+            nkey = key
+        k[nkey.lower()] = primer_dict[key]
+    return(k)
+
 
 def primer3_to_pandas(primer_dict, assay_type):
 
     oligos, row_start = return_oligo_list(assay_type)
 
+    primer_dict = convert_results_dict_naming(primer_dict)
     primer_df = pd.DataFrame.from_dict(primer_dict.items())          # Convert the dict into a pandas dataframe
     primer_df = primer_df.rename(columns={0:'parameter', 1:'value'}) # Rename the columns
     # Create a column which is primer pair #, and a column for primer parameter which does not contain primer pair #
@@ -123,11 +141,11 @@ def primer3_to_pandas(primer_dict, assay_type):
     primer_df = primer_df.pivot(index='parameter', columns='primer_pair', values='value')
 
     # Get a list of the rows we need 
-    primer_span = [f'PRIMER_{oligo}' for oligo in oligos]
-    required_info = ['SEQUENCE', 'TM', 'GC_PERCENT']
+    primer_span = [f'primer_{oligo}' for oligo in oligos]
+    required_info = ['sequence', 'TM', 'GC_PERCENT']
     required_info = [p + "_" + y for y in required_info for p in primer_span] + primer_span
-    required_info = required_info + ['PRIMER_PAIR_PRODUCT_SIZE'] if assay_type != 'probe' else required_info
-
+    required_info = required_info + ['primer_PAIR_PRODUCT_SIZE'] if assay_type != 'probe' else required_info
+    required_info = [string.lower() for string in required_info]
     # Subset data frame
     primer_df = primer_df.loc[required_info, np.arange(primer_df.shape[1]).astype(str)]
     return(primer_df)
@@ -225,16 +243,16 @@ def get_primer_alt_frequencies(primer_df, gdna_pos, pair, sample_set, assay_type
 
   di = {}
   for oligo in oligos:
-    primer_loc = primer_df.loc[f'PRIMER_{oligo}', str(pair)][0]
-    primer_loc = primer_loc + 1 if oligo == 'RIGHT' else primer_loc
-    primer_size = primer_df.loc[f'PRIMER_{oligo}', str(pair)][1]
-    if oligo in ['LEFT', 'INTERNAL']:
+    primer_loc = primer_df.loc[f'primer_{oligo}', str(pair)][0]
+    primer_loc = primer_loc + 1 if oligo == 'reverse' else primer_loc
+    primer_size = primer_df.loc[f'primer_{oligo}', str(pair)][1]
+    if oligo in ['forward', 'probe']:
       freq = freq_arr[primer_loc:primer_loc+primer_size]
       base_freqs_arr = base_freqs[primer_loc:primer_loc+primer_size, :]
       ref = ref_alt_arr[primer_loc:primer_loc+primer_size, 0]
       ref_alt = ref_alt_arr[primer_loc:primer_loc+primer_size, :]
       pos = pos_arr[primer_loc:primer_loc+primer_size]
-    elif oligo == 'RIGHT':
+    elif oligo == 'reverse':
       freq = np.flip(freq_arr[primer_loc-primer_size:primer_loc])
       base_freqs_arr = base_freqs[primer_loc-primer_size:primer_loc, :]
       base_freqs_arr = np.flip(base_freqs_arr, axis=0)
@@ -285,8 +303,8 @@ def plotly_primers(primer_df, res_dict, name, assay_type, sample_set, target_loc
       color = [-1 if v == 0 else 1 if v > 0 else 0 for v in res_dict[i][oligo]['alt_frequency']]
       colorscale = [[0, 'lightgray'], [0.5, 'lightgray'], [1, 'dodgerblue']]
 
-      tm = np.round(primer_df.loc[f'PRIMER_{oligo}_TM', str(i)], 2)       
-      gc = np.round(primer_df.loc[f'PRIMER_{oligo}_GC_PERCENT', str(i)], 2)
+      tm = np.round(primer_df.loc[f'primer_{oligo}_tm', str(i)], 2)       
+      gc = np.round(primer_df.loc[f'primer_{oligo}_gc_percent', str(i)], 2)
       span = f"{int(res_dict[i][oligo]['position'].min())}-{int(res_dict[i][oligo]['position'].max())}"
       # Write text to plot for Tm, GC, span, and 3/5'
 
@@ -371,9 +389,10 @@ def get_qPCR_locs(gff, contig, transcript):
     return(locgff, min_, max_, genegff)
 
 
-def plot_primer_locs(primer_res_dict, primer_df, gff, contig, seq_parameters, assay_type, legend_loc='best'):
+def plot_primer_locs(primer_res_dict, primer_df, gff, contig, seq_parameters, assay_type, legend_loc='best', save=True):
     
     oligos, _ = return_oligo_list(assay_type)
+    assay_name = seq_parameters['SEQUENCE_ID']
     # Load geneset (gff)
     if any(item in assay_type for item in ['gDNA', 'probe']):
         start = seq_parameters['GENOMIC_SEQUENCE_TARGET'] - 500
@@ -387,6 +406,11 @@ def plot_primer_locs(primer_res_dict, primer_df, gff, contig, seq_parameters, as
 
     fig, ax = plt.subplots(1,1, figsize=[16,4])
     # configure axes
+    if min_ in ['inf', 'NaN']:
+      min_ = start
+    if max_ in ['inf', 'NaN']:
+      max_ = end
+
     ax.set_xlim(min_, max_)
     ax.set_ylim(-0.5, 1.5)
     ax.ticklabel_format(useOffset=False)
@@ -436,11 +460,11 @@ def plot_primer_locs(primer_res_dict, primer_df, gff, contig, seq_parameters, as
       for oligo in oligos:
         lower, upper = primer_res_dict[pair][oligo]['position'].min() , primer_res_dict[pair][oligo]['position'].max()
 
-        if oligo == 'LEFT':
+        if oligo == 'forward':
             plt.arrow(lower, 0.8+(2/(10-(pair))), upper-lower, 0, width=0.03, length_includes_head=True, color=pal[pair])
-        elif oligo == 'RIGHT':
+        elif oligo == 'reverse':
             plt.arrow(upper, 0.8+(2/(10-(pair))), lower-upper, 0, width=0.03, length_includes_head=True, color=pal[pair])
-        elif oligo == 'INTERNAL':
+        elif oligo == 'probe':
             ax.axhline(y=0.8+(2/(10-(pair))), xmin=lower, xmax=upper)
             line = plt.Line2D((lower, upper), (0.8+(2/(10-(pair))), 0.8+(2/(10-(pair)))), lw=2.5, color=pal[pair])
             ax.add_line(line)
@@ -450,30 +474,68 @@ def plot_primer_locs(primer_res_dict, primer_df, gff, contig, seq_parameters, as
       handles.append(patch) 
     # plot the legend
     plt.legend(handles=handles, loc=legend_loc)
+    fig.savefig(f"{assay_name}_primer_locs.png", dpi=300)
+
+
+def batch_primer(target_df, assay_type, primer_parameters, amplicon_size_range, sample_sets, sample_query):
+    # Connect to the malariagen_data ag3 API
+    ag3 = malariagen_data.Ag3() #pre=True
+    
+    genome_seq = {}
+    for idx, target in target_df.iterrows():
+        assay_name = target['name']
+        target_loc = target['target']
+        contig = target['contig']
+        genome_seq[contig] = ag3.genome_sequence(region=contig)
+        print(f"Our genome sequence for {contig} is {genome_seq[contig].shape[0]} bp long")
+        
+        if any(item in assay_type for item in ['gDNA', 'probe']):
+          # genomic DNA
+          target_sequence, gdna_pos, seq_parameters = prepare_gDNA_sequence(target_loc=target_loc, amplicon_size_range=amplicon_size_range, genome_seq=genome_seq[contig], assay_name=assay_name, assay_type=assay_type)
+        elif assay_type == 'qPCR primers':
+          # RT-quantitative PCR, cDNA
+          target_sequence, exon_junctions, gdna_pos, seq_parameters = prepare_cDNA_sequence(transcript=target_loc, gff=ag3.geneset(), genome_seq=genome_seq, assay_name=assay_name)
+        
+        primer_dict = primer3.designPrimers(seq_args=seq_parameters, global_args=primer_parameters)
+        primer_df = primer3_to_pandas(primer_dict, assay_type)
+        primer_df.to_csv(f"{assay_name}.{assay_type}.primers.tsv", sep="\t")
+        primer_df.to_excel(f"{assay_name}.{assay_type}.primers.xlsx")
+        
+        results_dict = plot_primer_ag3_frequencies(primer_df=primer_df,
+                                                gdna_pos=gdna_pos,
+                                                contig=contig,
+                                                sample_set=sample_sets, 
+                                                sample_query=sample_query,
+                                                assay_type=assay_type,
+                                                seq_parameters=seq_parameters,
+                                                save=True)
+        
+        plot_primer_locs(primer_res_dict=results_dict, 
+                                    primer_df=primer_df, 
+                                    assay_type=assay_type, 
+                                    gff=ag3.geneset(), 
+                                    contig=contig, 
+                                    seq_parameters=seq_parameters, 
+                                    legend_loc='lower left',
+                                    save=True)
 
 
 
 
 
-
-
-
-def gget_blat_genome(primer_df, assay_type):
-    oligo_map = {'LEFT':'Forward', 
-               'RIGHT': 'Reverse',
-               'INTERNAL': 'Probe'}
+def gget_blat_genome(primer_df, assay_type, assembly='anoGam3'):
     oligos, _ = return_oligo_list(assay_type=assay_type)
 
     pair_list = {}
     for primer_pair in primer_df:
         oligo_list = []
         for oligo in oligos:
-            seq = primer_df[primer_pair].loc[f'PRIMER_{oligo}_SEQUENCE']
-            blat_df = gget.blat(sequence=seq, seqtype='DNA', assembly='anoGam3')
+            seq = primer_df[primer_pair].loc[f'primer_{oligo}_sequence']
+            blat_df = gget.blat(sequence=seq, seqtype='DNA', assembly=assembly)
             if blat_df is None:
-                print(f"No hit for {oligo_map[oligo]} - pair {primer_pair}")
+                print(f"No hit for {oligo} - pair {primer_pair}")
                 continue
-            blat_df.loc[:, 'primer'] = f"{oligo_map[oligo]}_{primer_pair}"
+            blat_df.loc[:, 'primer'] = f"{oligo}_{primer_pair}"
             oligo_list.append(blat_df.set_index('primer'))
         pair_list[primer_pair] = pd.concat(oligo_list)
     return(pd.concat(pair_list))
@@ -514,19 +576,19 @@ def gget_blat_genome(primer_df, assay_type):
 #       axes.set_yticklabels("")
 
 #     if assay_type == 'qPCR primers':
-#       a = primer_df.loc[f'PRIMER_{oligo}', str(i)]
-#       a = a[0] - a[1] if oligo == 'RIGHT' else a[0] + a[1]
+#       a = primer_df.loc[f'primer_{oligo}', str(i)]
+#       a = a[0] - a[1] if oligo == 'reverse' else a[0] + a[1]
 #       arr = np.array(exon_junctions) - a
 #       if (np.abs(arr) < 18).any():
 #         bases_in_new_exon  = arr[np.abs(arr) < 18]
-#         plt.setp(axes.get_xticklabels()[bases_in_new_exon[0]:], backgroundcolor="antiquewhite") if oligo == 'RIGHT' else plt.setp(axes.get_xticklabels()[:bases_in_new_exon[0]], backgroundcolor="antiquewhite")
+#         plt.setp(axes.get_xticklabels()[bases_in_new_exon[0]:], backgroundcolor="antiquewhite") if oligo == 'reverse' else plt.setp(axes.get_xticklabels()[:bases_in_new_exon[0]], backgroundcolor="antiquewhite")
     
 #     if oligo == 'LEFT':
-#       axes.set_title(f"Forward primer {i}") 
-#     elif oligo == 'RIGHT':
-#       axes.set_title(f"Reverse primer {i}")
+#       axes.set_title(f"forward primer {i}") 
+#     elif oligo == 'reverse':
+#       axes.set_title(f"reverse primer {i}")
 #     elif oligo == 'INTERNAL':
-#       axes.set_title(f"Probe {i}")
+#       axes.set_title(f"probe {i}")
 #       idx = np.where(res_dict[i][oligo]['position'] == target_loc)[0][0]
 #       plt.setp(axes.get_xticklabels()[idx], backgroundcolor="antiquewhite")
 #     plot_pair_text(primer_df, i, axes, oligo, res_dict)
@@ -536,8 +598,8 @@ def gget_blat_genome(primer_df, assay_type):
 #   """
 #   Plot text relating to primer characteristics (Tm etc)
 #   """
-#   tm = np.round(primer_df.loc[f'PRIMER_{oligo}_TM', str(pair)], 2)       
-#   gc = np.round(primer_df.loc[f'PRIMER_{oligo}_GC_PERCENT', str(pair)], 2)
+#   tm = np.round(primer_df.loc[f'primer_{oligo}_TM', str(pair)], 2)       
+#   gc = np.round(primer_df.loc[f'primer_{oligo}_GC_PERCENT', str(pair)], 2)
 #   span = f"{int(res_dict[pair][oligo]['position'].min())}-{int(res_dict[pair][oligo]['position'].max())}"
 #   # Write text to plot for Tm, GC, span, and 3/5'
 #   ax.text(x=2, y=0.5, s=f"TM={tm}", bbox=dict(facecolor='white', edgecolor='black', alpha=0.4, boxstyle='round', pad=0.5))
