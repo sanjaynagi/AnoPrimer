@@ -18,4 +18,3 @@ jobs:
         notebook: "Primer-Design-in-Anopheles-gambiae.ipynb"
         params: "tests/qPCR_Params.json"
         isReport: False
-        poll: True
