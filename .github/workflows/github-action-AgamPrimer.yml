@@ -15,7 +15,7 @@ jobs:
         SECRETS: ${{ toJson(secrets) }}
         GITHUB: ${{ toJson(github) }}
       with:
-        notebook: "Primer-Design-in-Anopheles-gambiae.ipynb.ipynb"
+        notebook: "Primer-Design-in-Anopheles-gambiae.ipynb"
         params: "tests/qPCR_Params.json"
         isReport: False
         poll: True
