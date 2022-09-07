@@ -6,11 +6,11 @@ jobs:
   run:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - name: Set up Python
+    - uses: actions/checkout@v3
+    - name: Set up Python   
+      uses: actions/setup-python@v4
       with:
         python-version: '3.7' 
-      uses: actions/setup-python@v2
     - run: python3 -m pip install malariagen_data>=6.0.0 primer3-py nbformat ipykernel papermill nbconvert seaborn plotly
     - run: python -m ipykernel install --user --name AgamPrimer
     - run: papermill Primer-Design-in-Anopheles-gambiae.ipynb qPCR_run.ipynb -k AgamPrimer -f tests/qPCR_Params.json
