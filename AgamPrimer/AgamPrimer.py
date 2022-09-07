@@ -280,6 +280,9 @@ def plotly_primers(primer_df, res_dict, name, assay_type, sample_set, target_loc
     plt_title = ['Forward primer', 'Reverse primer']
   elif len(oligos) == 3:
     plt_title = ['Forward primer', 'Reverse primer', 'Probe']
+  elif len(oligos) == 1:
+    plt_title = ['Probe']
+    
   title_list = []
   for pair in primer_df:
       for oligo in plt_title:
