@@ -10,8 +10,8 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
     - run: python3 -m pip install nbformat ipykernel papermill nbconvert 
-    - run: python -m ipykernel install --user --name locusPocus
-    - run: papermill Primer-Design-in-Anopheles-gambiae.ipynb qPCR_run.ipynb -k locusPocus -y tests/qPCR_Params.json
+    - run: python -m ipykernel install --user --name AgamPrimer
+    - run: papermill Primer-Design-in-Anopheles-gambiae.ipynb qPCR_run.ipynb -k AgamPrimer -f tests/qPCR_Params.json
 
 
 
