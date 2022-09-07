@@ -10,7 +10,7 @@ import plotly.graph_objects as go
 import gget
 import primer3
 
-ag3 = malariagen_data.Ag3()
+ag3 = malariagen_data.Ag3(url='gs://vo_agam_release/')
 
 def prepare_gDNA_sequence(target_loc, amplicon_size_range, genome_seq, assay_name, assay_type, probe_exclude_region_size=16):
     """
