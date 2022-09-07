@@ -11,7 +11,7 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: '3.7' 
-    - run: python3 -m pip install malariagen_data>=6.0.0 primer3-py nbformat ipykernel papermill nbconvert seaborn plotly
+    - run: python3 -m pip install malariagen_data>=6.0.0 primer3-py nbformat ipykernel papermill nbconvert seaborn plotly openpyxl
     - run: python -m ipykernel install --user --name AgamPrimer
     - run: papermill Primer-Design-in-Anopheles-gambiae.ipynb qPCR_run.ipynb -k AgamPrimer -f tests/qPCR_Params.json
     - run: papermill Primer-Design-in-Anopheles-gambiae.ipynb gDNA_run.ipynb -k AgamPrimer -f tests/gDNA_probe_Params.json
