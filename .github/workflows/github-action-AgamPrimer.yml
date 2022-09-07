@@ -8,6 +8,8 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python
+      with:
+        python-version: '3.7' 
       uses: actions/setup-python@v2
     - run: python3 -m pip install malariagen_data>=6.0.0 primer3-py nbformat ipykernel papermill nbconvert seaborn plotly
     - run: python -m ipykernel install --user --name AgamPrimer
