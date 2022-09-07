@@ -529,7 +529,7 @@ def batch_primer(target_df, assay_type, primer_parameters, amplicon_size_range, 
 def gget_blat_genome(primer_df, assay_type, assembly='anoGam3'):
     oligos, _ = return_oligo_list(assay_type=assay_type)
 
-    pair_list = {}
+    pair_dict = {}
     for primer_pair in primer_df:
         oligo_list = []
         for oligo in oligos:
@@ -540,8 +540,16 @@ def gget_blat_genome(primer_df, assay_type, assembly='anoGam3'):
                 continue
             blat_df.loc[:, 'primer'] = f"{oligo}_{primer_pair}"
             oligo_list.append(blat_df.set_index('primer'))
-        pair_list[primer_pair] = pd.concat(oligo_list)
-    return(pd.concat(pair_list))
+          
+        if oligo_list:
+          pair_dict[primer_pair] = pd.concat(oligo_list)
+        elif not oligo_list:
+          continue
+    
+    if pair_dict:
+      return(pd.concat(pair_dict))
+    else:
+      print("No HITs found for these primer pairs")
 
 
 
