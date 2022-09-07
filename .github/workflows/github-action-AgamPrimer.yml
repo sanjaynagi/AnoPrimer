@@ -9,12 +9,25 @@ jobs:
     - uses: actions/checkout@v1
     - name: Set up Python
       uses: actions/setup-python@v2
-    - uses: yaananth/run-notebook@v1
-      env:
-        RUNNER: ${{ toJson(runner) }}
-        SECRETS: ${{ toJson(secrets) }}
-        GITHUB: ${{ toJson(github) }}
-      with:
-        notebook: "Primer-Design-in-Anopheles-gambiae.ipynb"
-        params: "tests/qPCR_Params.json"
-        isReport: False
+    - run: python3 -m pip install nbformat ipykernel papermill nbconvert 
+    - run: python -m ipykernel install --user --name locusPocus
+    - run: papermill Primer-Design-in-Anopheles-gambiae.ipynb qPCR_run.ipynb -k locusPocus -y tests/qPCR_Params.json
+
+
+
+
+
+
+
+
+
+    # - uses: yaananth/run-notebook@v1
+    #   env:
+    #     RUNNER: ${{ toJson(runner) }}
+    #     SECRETS: ${{ toJson(secrets) }}
+    #     GITHUB: ${{ toJson(github) }}
+    #   with:
+    #     notebook: "Primer-Design-in-Anopheles-gambiae.ipynb"
+    #     params: "tests/qPCR_Params.json"
+    #     isReport: False
+      
