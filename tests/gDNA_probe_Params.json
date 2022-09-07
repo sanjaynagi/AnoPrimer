@@ -1,0 +1,9 @@
+{
+    "assay_type":"gDNA primers + probe",
+    "assay_name":"kdr_gDNA",
+    "min_amplicon_size": 60,
+    "max_amplicon_size": 100,
+    "n_primer_pairs":4,
+    "contig": "2L",
+    "target_loc": "2422652"
+}

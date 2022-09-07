@@ -1,0 +1,9 @@
+{
+    "assay_type":"probe",
+    "assay_name":"ChromX_probe",
+    "min_amplicon_size": 180,
+    "max_amplicon_size": 240,
+    "n_primer_pairs":6,
+    "contig": "X",
+    "target_loc": "9500000"
+}
