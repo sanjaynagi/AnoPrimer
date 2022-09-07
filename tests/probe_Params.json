@@ -5,5 +5,5 @@
     "max_amplicon_size": 240,
     "n_primer_pairs":6,
     "contig": "X",
-    "target_loc": "9500000"
+    "target_loc": 9500000
 }
