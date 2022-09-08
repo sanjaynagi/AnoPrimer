@@ -12,13 +12,13 @@ import primer3
 
 ag3 = malariagen_data.Ag3(url='gs://vo_agam_release/')
 
-def prepare_gDNA_sequence(target_loc, amplicon_size_range, genome_seq, assay_name, assay_type, probe_exclude_region_size=16):
+def prepare_gDNA_sequence(target_loc, amplicon_size_range, genome_seq, assay_name, assay_type, probe_exclude_region_size=20):
     """
     Extracts sequence of interest from genome sequence
     """
-    # Set up range for the input sequence, we'll take the middle range of the amplicon size and add that either
+    # Set up range for the input sequence, we'll take the max range of the amplicon size and add that either
     # side of the target SNP
-    amp_size_range = int(np.mean(amplicon_size_range)) 
+    amp_size_range = int(np.max(amplicon_size_range)) 
     start = target_loc - amp_size_range
     end = target_loc + amp_size_range
     # join array into be one character string, and store the positions of these sequences for later
@@ -125,8 +125,8 @@ def convert_results_dict_naming(primer_dict):
     return(k)
 
 
-def primer3_to_pandas(primer_dict, assay_type):
 
+def primer3_to_pandas(primer_dict, assay_type):
     oligos, row_start = return_oligo_list(assay_type)
 
     primer_dict = convert_results_dict_naming(primer_dict)
@@ -136,8 +136,12 @@ def primer3_to_pandas(primer_dict, assay_type):
     primer_df = primer_df.iloc[row_start:, :].copy()
     primer_df['primer_pair'] = primer_df['parameter'].str.extract("([0-9][0-9]|[0-9])")
     primer_df['parameter'] = primer_df['parameter'].str.replace("(_[0-9][0-9]|_[0-9])", "", regex=True)
-
-    # Put the different primer pairs in different columns
+    
+    #start_row = primer_df.eval('parameter == "primer_pair_penalty"')
+    #if any(start_row):
+    #  row_start = [i for i, x in enumerate(start_row) if x][0]
+    #  primer_df = primer_df.iloc[row_start:, :]
+    # P#ut the different primer pairs in different columns
     primer_df = primer_df.pivot(index='parameter', columns='primer_pair', values='value')
 
     # Get a list of the rows we need 
@@ -146,6 +150,7 @@ def primer3_to_pandas(primer_dict, assay_type):
     required_info = [p + "_" + y for y in required_info for p in primer_span] + primer_span
     required_info = required_info + ['primer_PAIR_PRODUCT_SIZE'] if assay_type != 'probe' else required_info
     required_info = [string.lower() for string in required_info]
+
     # Subset data frame
     primer_df = primer_df.loc[required_info, np.arange(primer_df.shape[1]).astype(str)]
     return(primer_df)
@@ -392,6 +397,7 @@ def get_qPCR_locs(gff, contig, transcript):
     return(locgff, min_, max_, genegff)
 
 
+
 def plot_primer_locs(primer_res_dict, primer_df, gff, contig, seq_parameters, assay_type, legend_loc='best', save=True):
     
     oligos, _ = return_oligo_list(assay_type)
@@ -406,6 +412,10 @@ def plot_primer_locs(primer_res_dict, primer_df, gff, contig, seq_parameters, as
     elif assay_type == 'qPCR primers':
         transcript = seq_parameters['TRANSCRIPT']
         locgff, min_, max_, genegff = get_qPCR_locs(gff, contig, transcript)
+
+    if locgff.empty:
+      print("No exons in close proximity for loc plot")
+      return
 
     fig, ax = plt.subplots(1,1, figsize=[16,4])
     # configure axes
@@ -477,50 +487,51 @@ def plot_primer_locs(primer_res_dict, primer_df, gff, contig, seq_parameters, as
       handles.append(patch) 
     # plot the legend
     plt.legend(handles=handles, loc=legend_loc)
-    fig.savefig(f"{assay_name}_primer_locs.png", dpi=300)
+    if save:
+      fig.savefig(f"{assay_name}_primer_locs.png", dpi=300)
 
 
-def batch_primer(target_df, assay_type, primer_parameters, amplicon_size_range, sample_sets, sample_query):
-    # Connect to the malariagen_data ag3 API
-    ag3 = malariagen_data.Ag3() #pre=True
+# def batch_primer(target_df, assay_type, primer_parameters, amplicon_size_range, sample_sets, sample_query):
+#     # Connect to the malariagen_data ag3 API
+#     ag3 = malariagen_data.Ag3() #pre=True
     
-    genome_seq = {}
-    for idx, target in target_df.iterrows():
-        assay_name = target['name']
-        target_loc = target['target']
-        contig = target['contig']
-        genome_seq[contig] = ag3.genome_sequence(region=contig)
-        print(f"Our genome sequence for {contig} is {genome_seq[contig].shape[0]} bp long")
+#     genome_seq = {}
+#     for idx, target in target_df.iterrows():
+#         assay_name = target['name']
+#         target_loc = target['target']
+#         contig = target['contig']
+#         genome_seq[contig] = ag3.genome_sequence(region=contig)
+#         print(f"Our genome sequence for {contig} is {genome_seq[contig].shape[0]} bp long")
         
-        if any(item in assay_type for item in ['gDNA', 'probe']):
-          # genomic DNA
-          target_sequence, gdna_pos, seq_parameters = prepare_gDNA_sequence(target_loc=target_loc, amplicon_size_range=amplicon_size_range, genome_seq=genome_seq[contig], assay_name=assay_name, assay_type=assay_type)
-        elif assay_type == 'qPCR primers':
-          # RT-quantitative PCR, cDNA
-          target_sequence, exon_junctions, gdna_pos, seq_parameters = prepare_cDNA_sequence(transcript=target_loc, gff=ag3.geneset(), genome_seq=genome_seq, assay_name=assay_name)
+#         if any(item in assay_type for item in ['gDNA', 'probe']):
+#           # genomic DNA
+#           target_sequence, gdna_pos, seq_parameters = prepare_gDNA_sequence(target_loc=target_loc, amplicon_size_range=amplicon_size_range, genome_seq=genome_seq[contig], assay_name=assay_name, assay_type=assay_type)
+#         elif assay_type == 'qPCR primers':
+#           # RT-quantitative PCR, cDNA
+#           target_sequence, exon_junctions, gdna_pos, seq_parameters = prepare_cDNA_sequence(transcript=target_loc, gff=ag3.geneset(), genome_seq=genome_seq, assay_name=assay_name)
         
-        primer_dict = primer3.designPrimers(seq_args=seq_parameters, global_args=primer_parameters)
-        primer_df = primer3_to_pandas(primer_dict, assay_type)
-        primer_df.to_csv(f"{assay_name}.{assay_type}.primers.tsv", sep="\t")
-        primer_df.to_excel(f"{assay_name}.{assay_type}.primers.xlsx")
+#         primer_dict = primer3.designPrimers(seq_args=seq_parameters, global_args=primer_parameters)
+#         primer_df = primer3_to_pandas(primer_dict, assay_type)
+#         primer_df.to_csv(f"{assay_name}.{assay_type}.primers.tsv", sep="\t")
+#         primer_df.to_excel(f"{assay_name}.{assay_type}.primers.xlsx")
         
-        results_dict = plot_primer_ag3_frequencies(primer_df=primer_df,
-                                                gdna_pos=gdna_pos,
-                                                contig=contig,
-                                                sample_set=sample_sets, 
-                                                sample_query=sample_query,
-                                                assay_type=assay_type,
-                                                seq_parameters=seq_parameters,
-                                                save=True)
+#         results_dict = plot_primer_ag3_frequencies(primer_df=primer_df,
+#                                                 gdna_pos=gdna_pos,
+#                                                 contig=contig,
+#                                                 sample_set=sample_sets, 
+#                                                 sample_query=sample_query,
+#                                                 assay_type=assay_type,
+#                                                 seq_parameters=seq_parameters,
+#                                                 save=True)
         
-        plot_primer_locs(primer_res_dict=results_dict, 
-                                    primer_df=primer_df, 
-                                    assay_type=assay_type, 
-                                    gff=ag3.geneset(), 
-                                    contig=contig, 
-                                    seq_parameters=seq_parameters, 
-                                    legend_loc='lower left',
-                                    save=True)
+#         plot_primer_locs(primer_res_dict=results_dict, 
+#                                     primer_df=primer_df, 
+#                                     assay_type=assay_type, 
+#                                     gff=ag3.geneset(), 
+#                                     contig=contig, 
+#                                     seq_parameters=seq_parameters, 
+#                                     legend_loc='lower left',
+#                                     save=True)
 
 
 
@@ -552,8 +563,51 @@ def gget_blat_genome(primer_df, assay_type, assembly='anoGam3'):
       print("No HITs found for these primer pairs")
 
 
+def designPrimers(assay_type, assay_name, min_amplicon_size, max_amplicon_size, n_primer_pairs, contig, target, primer_parameters, sample_set, sample_query=None, save=True):
 
+  amplicon_size_range = [[min_amplicon_size, max_amplicon_size]]
+  ## adds some necessary parameters depending on assay type
+  primer_parameters = primer_params(primer_parameters, assay_type) 
 
+  if assay_type == 'qPCR primers':
+    assert not isinstance(target, int), "qPCR primers chosen but an AGAP identifier is not provided as the target"
+    assert target.startswith("AGAP"), "qPCR primers chosen but an AGAP identifier is not provided as the target"
+    transcript = target
+    target_loc = ""
+  else:
+    assert isinstance(target, int), "For genomic DNA the target should be an integer within the contig"
+    transcript = ""
+    target_loc = target
+
+  genome_seq = ag3.genome_sequence(region=contig)
+  print(f"Our genome sequence for {contig} is {genome_seq.shape[0]} bp long")
+
+  if any(item in assay_type for item in ['gDNA', 'probe']):
+    # genomic DNA
+    target_sequence, gdna_pos, seq_parameters = prepare_gDNA_sequence(target_loc=target_loc, amplicon_size_range=amplicon_size_range, genome_seq=genome_seq, assay_name=assay_name, assay_type=assay_type)
+  elif assay_type == 'qPCR primers':
+    # RT-quantitative PCR, cDNA
+    target_sequence, exon_junctions, gdna_pos, seq_parameters = prepare_cDNA_sequence(transcript=transcript, gff=ag3.geneset(), genome_seq=genome_seq, assay_name=assay_name)
+    
+  primer_dict = primer3.designPrimers(seq_args=seq_parameters, global_args=primer_parameters)
+  #AgamPrimer.primer3_run_statistics(primer_dict, assay_type)
+  primer_df = primer3_to_pandas(primer_dict, assay_type)
+  
+  if save:
+    primer_df.to_csv(f"{assay_name}.{assay_type}.primers.tsv", sep="\t")
+    primer_df.to_excel(f"{assay_name}.{assay_type}.primers.xlsx")
+
+  results_dict = plot_primer_ag3_frequencies(primer_df=primer_df,
+                                              gdna_pos=gdna_pos,
+                                              contig=contig,
+                                              sample_set=sample_set, 
+                                              sample_query=sample_query,
+                                              assay_type=assay_type,
+                                              seq_parameters=seq_parameters,
+                                              save=save)
+  plot_primer_locs(primer_res_dict=results_dict, primer_df=primer_df, assay_type=assay_type, gff=ag3.geneset(), contig=contig, seq_parameters=seq_parameters, legend_loc='lower left', save=save)
+  blat_df = gget_blat_genome(primer_df, assay_type, assembly='anoGam3')
+  return(primer_df, blat_df)
 
 
 
