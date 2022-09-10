@@ -76,16 +76,41 @@ def prepare_cDNA_sequence(transcript, gff, genome_seq, assay_name):
 
 
 
-def primer_params(primer_parameters, assay_type):
-    if assay_type == 'gDNA primers + probe':
-        primer_parameters['PRIMER_PICK_INTERNAL_OLIGO'] = 1
-        primer_parameters['PRIMER_PICK_RIGHT_PRIMER'] = 1
-        primer_parameters['PRIMER_PICK_LEFT_PRIMER'] = 1
-    elif assay_type == 'probe':
-        primer_parameters['PRIMER_PICK_INTERNAL_OLIGO'] = 1
-        primer_parameters['PRIMER_PICK_RIGHT_PRIMER'] = 0
-        primer_parameters['PRIMER_PICK_LEFT_PRIMER'] = 0
-    return(primer_parameters)
+def primer_params(assay_type, primer_parameters=None, n_primer_pairs=None, amplicon_size_range=None, generate_defaults=False):
+
+  if generate_defaults:
+    primer_parameters  =  {
+        'PRIMER_OPT_SIZE': 20,
+        'PRIMER_TASK':'generic',
+        'PRIMER_MIN_SIZE': 17,
+        'PRIMER_MAX_SIZE': 24,
+        'PRIMER_OPT_TM': 60.0,
+        'PRIMER_MIN_TM': 57.0,
+        'PRIMER_MAX_TM': 63.0,
+        'PRIMER_MIN_GC': 30.0,
+        'PRIMER_MAX_GC': 70.0,
+        'PRIMER_MIN_THREE_PRIME_DISTANCE':3,          # this parameter is the minimum distance between successive pairs. If 1, it means successive primer pairs could be identical bar one base shift
+        'PRIMER_INTERNAL_OPT_SIZE': 16,               # Probe size preferences if selected, otherwise ignored
+        'PRIMER_INTERNAL_MIN_SIZE': 10,
+        'PRIMER_INTERNAL_MAX_SIZE': 22,
+        'PRIMER_INTERNAL_MIN_TM': 45,
+        'PRIMER_INTERNAL_MAX_TM':65,                # Probe considerations are quite relaxed, assumed that LNAs will be used later to affect TM
+        # Extra primer3 parameters can go here
+        # In the same format as above                       
+    }
+
+  primer_parameters['PRIMER_NUM_RETURN'] = n_primer_pairs
+  primer_parameters['PRIMER_PRODUCT_SIZE_RANGE'] = amplicon_size_range
+
+  if assay_type == 'gDNA primers + probe':
+      primer_parameters['PRIMER_PICK_INTERNAL_OLIGO'] = 1
+      primer_parameters['PRIMER_PICK_RIGHT_PRIMER'] = 1
+      primer_parameters['PRIMER_PICK_LEFT_PRIMER'] = 1
+  elif assay_type == 'probe':
+      primer_parameters['PRIMER_PICK_INTERNAL_OLIGO'] = 1
+      primer_parameters['PRIMER_PICK_RIGHT_PRIMER'] = 0
+      primer_parameters['PRIMER_PICK_LEFT_PRIMER'] = 0
+  return(primer_parameters)
 
 def primer3_run_statistics(primer_dict, assay_type):
     _, row_start = return_oligo_list(assay_type)
@@ -567,7 +592,10 @@ def designPrimers(assay_type, assay_name, min_amplicon_size, max_amplicon_size, 
 
   amplicon_size_range = [[min_amplicon_size, max_amplicon_size]]
   ## adds some necessary parameters depending on assay type
-  primer_parameters = primer_params(primer_parameters, assay_type) 
+  if primer_parameters == 'default':
+    primer_parameters = primer_params(primer_parameters=None, assay_type=assay_type, n_primer_pairs=n_primer_pairs, amplicon_size_range=amplicon_size_range, generate_defaults=True)
+  else:
+    primer_parameters = primer_params(primer_parameters=primer_parameters, assay_type=assay_type, n_primer_pairs=n_primer_pairs, amplicon_size_range=amplicon_size_range, generate_defaults=False) 
 
   if assay_type == 'qPCR primers':
     assert not isinstance(target, int), "qPCR primers chosen but an AGAP identifier is not provided as the target"
