@@ -8,7 +8,7 @@ setuptools.setup(
     version="0.5.5",
     author="Sanjay Curtis Nagi",
     author_email="sanjay.c.nagi@gmail.com",
-    description="A small package to store some functions for the the AgamPrimer notebook, to improve readability.",
+    description="A package to design primers in Anopheles gambiae whilst considering genetic variation in the Ag1000g.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/sanjaynagi/AgamPrimer",
