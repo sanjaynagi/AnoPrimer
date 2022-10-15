@@ -13,6 +13,6 @@ jobs:
         python-version: '3.7'
     - run: python3 -m pip install AgamPrimer nbformat ipykernel papermill nbconvert
     - run: python -m ipykernel install --user --name AgamPrimer
-    - run: papermill notebooks/Primer-Design-in-Anopheles-gambiae.ipynb qPCR_run.ipynb -k AgamPrimer -f tests/qPCR_Params.json
-    - run: papermill notebooks/Primer-Design-in-Anopheles-gambiae.ipynb gDNA_run.ipynb -k AgamPrimer -f tests/gDNA_probe_Params.json
-    - run: papermill notebooks/Primer-Design-in-Anopheles-gambiae.ipynb probe_run.ipynb -k AgamPrimer -f tests/probe_Params.json
+    - run: papermill notebooks/AgamPrimer-long.ipynb qPCR_run.ipynb -k AgamPrimer -f tests/qPCR_Params.json
+    - run: papermill notebooks/AgamPrimer-long.ipynb gDNA_run.ipynb -k AgamPrimer -f tests/gDNA_probe_Params.json
+    - run: papermill notebooks/AgamPrimer-long.ipynb probe_run.ipynb -k AgamPrimer -f tests/probe_Params.json
