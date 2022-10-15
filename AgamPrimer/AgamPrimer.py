@@ -213,7 +213,7 @@ def plot_primer_ag3_frequencies(
     sample_set,
     assay_type,
     seq_parameters,
-    save=True,
+    out_dir=None,
     sample_query=None,
 ):
     """
@@ -251,7 +251,7 @@ def plot_primer_ag3_frequencies(
         sample_set=sample_set,
         target_loc=target_loc,
         transcript=transcript,
-        save=save,
+        out_dir=out_dir,
     )
 
     return res_dict
@@ -265,7 +265,7 @@ def plot_primer_locs(
     seq_parameters,
     assay_type,
     legend_loc="best",
-    save=True,
+    out_dir=None,
 ):
     """
     Plot the position of the primer sets in relation to any nearby exons
@@ -413,8 +413,8 @@ def plot_primer_locs(
         handles.append(patch)
     # plot the legend
     plt.legend(handles=handles, loc=legend_loc)
-    if save:
-        fig.savefig(f"{assay_name}_primer_locs.png", dpi=300)
+    if out_dir:
+        fig.savefig(f"{out_dir}/{assay_name}_primer_locs.png", dpi=300)
 
 
 def gget_blat_genome(primer_df, assay_type, assembly="anoGam3"):
@@ -457,7 +457,7 @@ def designPrimers(
     primer_parameters,
     sample_set,
     sample_query=None,
-    save=True,
+    out_dir=None,
 ):
     """
     Run whole AgamPrimer workflow to design primers/probes with in one function
@@ -528,11 +528,11 @@ def designPrimers(
         seq_args=seq_parameters, global_args=primer_parameters
     )
     # AgamPrimer.primer3_run_statistics(primer_dict, assay_type)
-    primer_df = primer3_to_pandas(primer_dict, assay_type)
+    primer_df = primer3_to_pandas(primer_dict=primer_dict, assay_type=assay_type)
 
-    if save:
-        primer_df.to_csv(f"{assay_name}.{assay_type}.primers.tsv", sep="\t")
-        primer_df.to_excel(f"{assay_name}.{assay_type}.primers.xlsx")
+    if out_dir:
+        primer_df.to_csv(f"{out_dir}/{assay_name}.{assay_type}.tsv", sep="\t")
+        primer_df.to_excel(f"{out_dir}/{assay_name}.{assay_type}.xlsx")
 
     results_dict = plot_primer_ag3_frequencies(
         primer_df=primer_df,
@@ -542,7 +542,7 @@ def designPrimers(
         sample_query=sample_query,
         assay_type=assay_type,
         seq_parameters=seq_parameters,
-        save=save,
+        out_dir=out_dir,
     )
     plot_primer_locs(
         primer_res_dict=results_dict,
@@ -552,9 +552,10 @@ def designPrimers(
         contig=contig,
         seq_parameters=seq_parameters,
         legend_loc="lower left",
-        save=save,
+        out_dir=out_dir,
     )
     blat_df = gget_blat_genome(primer_df, assay_type, assembly="anoGam3")
+    blat_df.to_csv(f"{out_dir}/{assay_name}.{assay_type}.blat.tsv", sep="\t")
     return (primer_df, blat_df)
 
 
@@ -649,7 +650,14 @@ def _get_primer_alt_frequencies(
 
 
 def _plotly_primers(
-    primer_df, res_dict, name, assay_type, sample_set, target_loc, transcript, save=True
+    primer_df,
+    res_dict,
+    name,
+    assay_type,
+    sample_set,
+    target_loc,
+    transcript,
+    out_dir=None,
 ):
 
     oligos, _ = _return_oligo_list(assay_type)
@@ -808,7 +816,7 @@ def _plotly_primers(
         template="simple_white",
         showlegend=False,
     )
-    if save:
+    if out_dir:
         fig.write_html(f"{name}_{assay_type}.html")
         fig.write_image(f"{name}_{assay_type}.pdf")
     fig.show()
