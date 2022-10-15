@@ -8,7 +8,10 @@ Primer Design in *Anopheles gambiae s.l* taking into account SNP variation in pr
 - quantitative PCR primers (cDNA, designed to span exon-exon junctions)
 - probe design
 
------------->------------>------------>------------>   [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sanjaynagi/AgamPrimer/blob/main/notebooks/Primer-Design-in-Anopheles-gambiae.ipynb)    <------------<------------<------------<------------
+------------>     Long     ------------>   [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sanjaynagi/AgamPrimer/blob/main/notebooks/AgamPrimer-long.ipynb)    <------------     Long    <------------
+
+
+------------>     Short     ------------>    [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sanjaynagi/AgamPrimer/blob/main/notebooks/AgamPrimer-short.ipynb)    <------------     Short    <------------
 
 #### Release notes
 
