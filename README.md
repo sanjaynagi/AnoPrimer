@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/License-MIT-blue)](#license)
 
 
-Primer Design in *Anopheles gambiae s.l* taking into account SNP variation in primer binding sites, using primer3-py and malariagen_data. Supports:
+Primer and hybridisation probe design in *Anopheles gambiae s.l* taking into account SNP variation in primer binding sites, using primer3-py and malariagen_data. Supports:
 
 - genomic DNA primers
 - quantitative PCR primers (cDNA, designed to span exon-exon junctions)
