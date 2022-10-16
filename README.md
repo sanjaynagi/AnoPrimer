@@ -1,5 +1,8 @@
 [<img src="https://github.com/sanjaynagi/AgamPrimer/blob/main/graphics/AgamPrimer_logo.png?raw=True" width="400"/>](https://github.com/sanjaynagi/AgamPrimer/blob/main/graphics/AgamPrimer_logo.png?raw=True)   
 [![DOI](https://zenodo.org/badge/503315581.svg)](https://zenodo.org/badge/latestdoi/503315581)
+[![Execute notebook](https://github.com/sanjaynagi/AgamPrimer/workflows/Execute%20notebook/badge.svg)](https://github.com/sanjaynagi/AgamPrimer/actions?query=workflow:"Execute+notebook")
+[![GitHub release](https://img.shields.io/github/release/sanjaynagi/AgamPrimer?include_prereleases=&sort=semver&color=blue)](https://github.com/sanjaynagi/AgamPrimer/releases/)
+[![License](https://img.shields.io/badge/License-MIT-blue)](#license)
 
 
 Primer Design in *Anopheles gambiae s.l* taking into account SNP variation in primer binding sites, using primer3-py and malariagen_data. Supports:
@@ -8,10 +11,10 @@ Primer Design in *Anopheles gambiae s.l* taking into account SNP variation in pr
 - quantitative PCR primers (cDNA, designed to span exon-exon junctions)
 - probe design
 
------------->     Long notebook    ------------>   [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sanjaynagi/AgamPrimer/blob/main/notebooks/AgamPrimer-long.ipynb)    <------------     Long notebook   <------------
+|- - - - - - -     Long notebook    - - - - - - -     [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sanjaynagi/AgamPrimer/blob/main/notebooks/AgamPrimer-long.ipynb)      - - - - - - -     Long notebook   - - - - - - -|
 
 
------------->     Short notebook    ------------>    [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sanjaynagi/AgamPrimer/blob/main/notebooks/AgamPrimer-short.ipynb)    <------------     Short notebook   <------------
+|- - - - - - -     Short notebook   - - - - - - -      [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sanjaynagi/AgamPrimer/blob/main/notebooks/AgamPrimer-short.ipynb)      - - - - - - -    Short notebook   - - - - - - -|
 
 #### Release notes
 
