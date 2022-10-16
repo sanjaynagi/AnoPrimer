@@ -1,4 +1,4 @@
-[<img src="https://github.com/sanjaynagi/AgamPrimer/blob/main/graphics/AgamPrimer_logo.png?raw=True" width="400"/>](https://github.com/sanjaynagi/AgamPrimer/blob/main/graphics/AgamPrimer_logo.png?raw=True)
+[<img src="https://github.com/sanjaynagi/AgamPrimer/blob/main/graphics/AgamPrimer_logo.png?raw=True" width="400"/>](https://github.com/sanjaynagi/AgamPrimer/blob/main/graphics/AgamPrimer_logo.png?raw=True)   
 [![DOI](https://zenodo.org/badge/503315581.svg)](https://zenodo.org/badge/latestdoi/503315581)
 
 
