@@ -11,10 +11,10 @@ Primer Design in *Anopheles gambiae s.l* taking into account SNP variation in pr
 - quantitative PCR primers (cDNA, designed to span exon-exon junctions)
 - probe design
 
-|- - - - - - -     Long notebook    - - - - - - -     [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sanjaynagi/AgamPrimer/blob/main/notebooks/AgamPrimer-long.ipynb)      - - - - - - -     Long notebook   - - - - - - -|
+|- - - - - - - - - - - - - - - - - - - - - - - - -    [![Custom badge](https://img.shields.io/endpoint?color=white&logo=Google%20Colab&url=https%3A%2F%2Fraw.githubusercontent.com%2Fsanjaynagi%2FAgamPrimer%2Fmain%2Fgraphics%2Fbadge.json)](https://colab.research.google.com/github/sanjaynagi/AgamPrimer/blob/main/notebooks/AgamPrimer-long.ipynb)      - - - - - - - - - - - - - - - - - - - - - - - - -|
 
 
-|- - - - - - -     Short notebook   - - - - - - -      [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/sanjaynagi/AgamPrimer/blob/main/notebooks/AgamPrimer-short.ipynb)      - - - - - - -    Short notebook   - - - - - - -|
+|- - - - - - - - - - - - - - - - - - - - - - - - -      [![Custom badge](https://img.shields.io/endpoint?color=red&logo=Google%20Colab&url=https%3A%2F%2Fraw.githubusercontent.com%2Fsanjaynagi%2FAgamPrimer%2Fmain%2Fgraphics%2Fbadge-short.json)](https://colab.research.google.com/github/sanjaynagi/AgamPrimer/blob/main/notebooks/AgamPrimer-short.ipynb)      - - - - - - - - - - - - - - - - - - - - - - - - -|
 
 #### Release notes
 
