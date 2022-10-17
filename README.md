@@ -4,17 +4,14 @@
 [![GitHub release](https://img.shields.io/github/release/sanjaynagi/AgamPrimer?include_prereleases=&sort=semver&color=blue)](https://github.com/sanjaynagi/AgamPrimer/releases/)
 [![License](https://img.shields.io/badge/License-MIT-blue)](#license)
 
+Primer design in *Anopheles gambiae s.l* taking into account SNP variation in primer binding sites, using primer3-py and malariagen_data. Supports genomic DNA primers, cDNA primers and hybridisation probes:    
 
-Primer and hybridisation probe design in *Anopheles gambiae s.l* taking into account SNP variation in primer binding sites, using primer3-py and malariagen_data. Supports:
-
-- genomic DNA primers
-- quantitative PCR primers (cDNA, designed to span exon-exon junctions)
-- probe design
-
-|- - - - - - - - - - - - - - - - - - - - - - - - -    [![Custom badge](https://img.shields.io/endpoint?color=white&logo=Google%20Colab&url=https%3A%2F%2Fraw.githubusercontent.com%2Fsanjaynagi%2FAgamPrimer%2Fmain%2Fgraphics%2Fbadge.json)](https://colab.research.google.com/github/sanjaynagi/AgamPrimer/blob/main/notebooks/AgamPrimer-long.ipynb)      - - - - - - - - - - - - - - - - - - - - - - - - -|
+-------------------------------------------------------- [![Custom badge](https://img.shields.io/endpoint?color=white&logo=Google%20Colab&url=https%3A%2F%2Fraw.githubusercontent.com%2Fsanjaynagi%2FAgamPrimer%2Fmain%2Fgraphics%2Fbadge.json)](https://colab.research.google.com/github/sanjaynagi/AgamPrimer/blob/main/notebooks/AgamPrimer-long.ipynb) --------------------------------------------------------   
 
 
-|- - - - - - - - - - - - - - - - - - - - - - - - -      [![Custom badge](https://img.shields.io/endpoint?color=red&logo=Google%20Colab&url=https%3A%2F%2Fraw.githubusercontent.com%2Fsanjaynagi%2FAgamPrimer%2Fmain%2Fgraphics%2Fbadge-short.json)](https://colab.research.google.com/github/sanjaynagi/AgamPrimer/blob/main/notebooks/AgamPrimer-short.ipynb)      - - - - - - - - - - - - - - - - - - - - - - - - -|
+-------------------------------------------------------- [![Custom badge](https://img.shields.io/endpoint?color=red&logo=Google%20Colab&url=https%3A%2F%2Fraw.githubusercontent.com%2Fsanjaynagi%2FAgamPrimer%2Fmain%2Fgraphics%2Fbadge-short.json)](https://colab.research.google.com/github/sanjaynagi/AgamPrimer/blob/main/notebooks/AgamPrimer-short.ipynb) -------------------------------------------------------  
+
+
 
 #### Release notes
 
