@@ -1,6 +1,6 @@
 name: Execute notebook
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   run:
