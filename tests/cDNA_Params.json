@@ -1,5 +1,5 @@
 {
-    "assay_type":"qPCR primers",
+    "assay_type":"cDNA primers",
     "assay_name":"coeae2f",
     "min_amplicon_size": 60,
     "max_amplicon_size": 120,

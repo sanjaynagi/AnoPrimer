@@ -226,10 +226,10 @@ def plot_primer_ag3_frequencies(
     name = seq_parameters["SEQUENCE_ID"]
     # exon_junctions = (
     #     seq_parameters["SEQUENCE_OVERLAP_JUNCTION_LIST"]
-    #     if assay_type == "qPCR primers"
+    #     if assay_type == "cDNA primers"
     #     else None
     # )
-    transcript = seq_parameters["TRANSCRIPT"] if assay_type == "qPCR primers" else None
+    transcript = seq_parameters["TRANSCRIPT"] if assay_type == "cDNA primers" else None
     target_loc = (
         seq_parameters["GENOMIC_SEQUENCE_TARGET"]
         if any(item in assay_type for item in ["gDNA", "probe"])
@@ -279,7 +279,7 @@ def plot_primer_locs(
         locgff, min_, max_, genegff = _get_gDNA_locs(gff, contig, start, end)
         min_ = np.min([min_, start])
         max_ = np.max([max_, end])
-    elif assay_type == "qPCR primers":
+    elif assay_type == "cDNA primers":
         transcript = seq_parameters["TRANSCRIPT"]
         locgff, min_, max_, genegff = _get_qPCR_locs(gff, contig, transcript)
 
@@ -482,13 +482,13 @@ def designPrimers(
             generate_defaults=False,
         )
 
-    if assay_type == "qPCR primers":
+    if assay_type == "cDNA primers":
         assert not isinstance(
             target, int
-        ), "qPCR primers chosen but an AGAP identifier is not provided as the target"
+        ), "cDNA primers chosen but an AGAP identifier is not provided as the target"
         assert target.startswith(
             "AGAP"
-        ), "qPCR primers chosen but an AGAP identifier is not provided as the target"
+        ), "cDNA primers chosen but an AGAP identifier is not provided as the target"
         transcript = target
         target_loc = ""
     else:
@@ -510,7 +510,7 @@ def designPrimers(
             assay_name=assay_name,
             assay_type=assay_type,
         )
-    elif assay_type == "qPCR primers":
+    elif assay_type == "cDNA primers":
         # RT-quantitative PCR, cDNA
         (
             target_sequence,
@@ -570,7 +570,7 @@ def _get_primer_arrays(contig, gdna_pos, sample_set, assay_type, sample_query=No
         geno = snps["call_genotype"]
         freq_arr = allel.GenotypeArray(geno).count_alleles().to_frequencies()
         pos_arr = gdna_pos
-    elif assay_type == "qPCR primers":
+    elif assay_type == "cDNA primers":
         freq_arr = []
         ref_alt_arr = []
         pos_arr = np.array([])
@@ -804,7 +804,7 @@ def _plotly_primers(
         title_text = f"{name} primer pairs | {sample_set} | target {target_loc} bp"
     elif assay_type == "probe":
         title_text = f"{name} probe | {sample_set} | target {target_loc} bp"
-    elif assay_type == "qPCR primers":
+    elif assay_type == "cDNA primers":
         title_text = f"{name} primer pairs | {sample_set} | target {transcript}"
 
     # fig.update_traces(customdata=customdata, hovertemplate=hovertemplate)
@@ -849,7 +849,7 @@ def _return_oligo_list(assay_type):
     if assay_type == "probe":
         oligos = ["probe"]
         row_start = 5
-    elif any(item == assay_type for item in ["gDNA primers", "qPCR primers"]):
+    elif any(item == assay_type for item in ["gDNA primers", "cDNA primers"]):
         oligos = ["forward", "reverse"]
         row_start = 7
     elif assay_type == "gDNA primers + probe":
