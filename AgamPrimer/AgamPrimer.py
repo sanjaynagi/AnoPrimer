@@ -24,11 +24,12 @@ def prepare_gDNA_sequence(
     """
     Extracts sequence of interest from genome sequence
     """
+    target = int(target_loc)
     # Set up range for the input sequence, we'll take the max range
     # of the amplicon size and add that either side of the target SNP
     amp_size_range = int(np.max(amplicon_size_range))
-    start = target_loc - amp_size_range
-    end = target_loc + amp_size_range
+    start = target - amp_size_range
+    end = target + amp_size_range
     # join array into be one character string, and store the positions
     # of these sequences for later
     target_sequence = "".join(genome_seq[start : end - 1].compute().astype(str))
@@ -36,7 +37,7 @@ def prepare_gDNA_sequence(
     print(f"The target sequence is {len(target_sequence)} bases long")
 
     # We need the target snp indices within the region of interest
-    target_loc_primer3 = int(np.where(gdna_pos == target_loc)[0])
+    target_loc_primer3 = int(np.where(gdna_pos == target)[0])
     target_loc_primer3 = [target_loc_primer3, 10]
     print(f"the target snp is {target_loc_primer3[0]} bp into our target sequence")
 
@@ -44,7 +45,7 @@ def prepare_gDNA_sequence(
         "SEQUENCE_ID": assay_name,
         "SEQUENCE_TEMPLATE": target_sequence,
         "SEQUENCE_TARGET": target_loc_primer3,
-        "GENOMIC_TARGET": target_loc,
+        "GENOMIC_TARGET": target,
     }
 
     if "probe" in assay_type:
