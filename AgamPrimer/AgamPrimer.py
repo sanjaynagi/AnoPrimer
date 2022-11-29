@@ -89,7 +89,7 @@ def prepare_cDNA_sequence(transcript, genome_seq, assay_name):
         "GENOMIC_TARGET": transcript,
     }
 
-    return (target_mRNA_seq, list(map(int, exon_junctions)), gdna_pos, seq_parameters)
+    return (target_mRNA_seq, gdna_pos, seq_parameters)
 
 
 def prepare_sequence(target, assay_type, assay_name, genome_seq, amplicon_size_range):
