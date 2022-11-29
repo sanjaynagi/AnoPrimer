@@ -4,6 +4,5 @@
     "min_amplicon_size": 60,
     "max_amplicon_size": 120,
     "n_primer_pairs":6,
-    "contig": "2L",
-    "transcript": "AGAP006228-RA"
+    "target": "AGAP006228-RA"
 }

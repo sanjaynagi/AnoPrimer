@@ -24,11 +24,12 @@ def prepare_gDNA_sequence(
     """
     Extracts sequence of interest from genome sequence
     """
+    target = int(target_loc)
     # Set up range for the input sequence, we'll take the max range
     # of the amplicon size and add that either side of the target SNP
     amp_size_range = int(np.max(amplicon_size_range))
-    start = target_loc - amp_size_range
-    end = target_loc + amp_size_range
+    start = target - amp_size_range
+    end = target + amp_size_range
     # join array into be one character string, and store the positions
     # of these sequences for later
     target_sequence = "".join(genome_seq[start : end - 1].compute().astype(str))
@@ -36,7 +37,7 @@ def prepare_gDNA_sequence(
     print(f"The target sequence is {len(target_sequence)} bases long")
 
     # We need the target snp indices within the region of interest
-    target_loc_primer3 = int(np.where(gdna_pos == target_loc)[0])
+    target_loc_primer3 = int(np.where(gdna_pos == target)[0])
     target_loc_primer3 = [target_loc_primer3, 10]
     print(f"the target snp is {target_loc_primer3[0]} bp into our target sequence")
 
@@ -44,7 +45,7 @@ def prepare_gDNA_sequence(
         "SEQUENCE_ID": assay_name,
         "SEQUENCE_TEMPLATE": target_sequence,
         "SEQUENCE_TARGET": target_loc_primer3,
-        "GENOMIC_SEQUENCE_TARGET": target_loc,
+        "GENOMIC_TARGET": target,
     }
 
     if "probe" in assay_type:
@@ -60,11 +61,12 @@ def prepare_gDNA_sequence(
     return (target_sequence, gdna_pos, seq_parameters)
 
 
-def prepare_cDNA_sequence(transcript, gff, genome_seq, assay_name):
+def prepare_cDNA_sequence(transcript, genome_seq, assay_name):
     """
     Extract exonic sequence for our transcript and record exon-exon junctions
     """
     # subset gff to your gene
+    gff = ag3.geneset()
     gff = gff.query("type == 'exon' & Parent == @transcript")
     # Get fasta sequence for each of our exons, and remember gDNA position
     seq = dict()
@@ -85,10 +87,33 @@ def prepare_cDNA_sequence(transcript, gff, genome_seq, assay_name):
         "SEQUENCE_ID": assay_name,
         "SEQUENCE_TEMPLATE": target_mRNA_seq,
         "SEQUENCE_OVERLAP_JUNCTION_LIST": list(map(int, exon_junctions)),
-        "TRANSCRIPT": transcript,
+        "GENOMIC_TARGET": transcript,
     }
 
-    return (target_mRNA_seq, list(map(int, exon_junctions)), gdna_pos, seq_parameters)
+    return (target_mRNA_seq, gdna_pos, seq_parameters)
+
+
+def prepare_sequence(target, assay_type, assay_name, genome_seq, amplicon_size_range):
+    """
+    Prepare the sequence for primer3, depending on cDNA or gDNA input type
+    """
+
+    if any(item in assay_type for item in ["gDNA", "probe"]):
+        # genomic DNA
+        target_sequence, gdna_pos, seq_parameters = prepare_gDNA_sequence(
+            target_loc=target,
+            amplicon_size_range=amplicon_size_range,
+            genome_seq=genome_seq,
+            assay_name=assay_name,
+            assay_type=assay_type,
+        )
+    elif assay_type == "cDNA primers":
+        # quantitative PCR
+        target_sequence, gdna_pos, seq_parameters = prepare_cDNA_sequence(
+            transcript=target, genome_seq=genome_seq, assay_name=assay_name
+        )
+
+    return (target_sequence, gdna_pos, seq_parameters)
 
 
 def primer_params(
@@ -210,7 +235,7 @@ def plot_primer_ag3_frequencies(
     primer_df,
     gdna_pos,
     contig,
-    sample_set,
+    sample_sets,
     assay_type,
     seq_parameters,
     out_dir=None,
@@ -224,22 +249,13 @@ def plot_primer_ag3_frequencies(
         print(f"Subsetting allele frequencies to {sample_query}")
 
     name = seq_parameters["SEQUENCE_ID"]
-    # exon_junctions = (
-    #     seq_parameters["SEQUENCE_OVERLAP_JUNCTION_LIST"]
-    #     if assay_type == "cDNA primers"
-    #     else None
-    # )
-    transcript = seq_parameters["TRANSCRIPT"] if assay_type == "cDNA primers" else None
-    target_loc = (
-        seq_parameters["GENOMIC_SEQUENCE_TARGET"]
-        if any(item in assay_type for item in ["gDNA", "probe"])
-        else None
-    )
+    target = seq_parameters["GENOMIC_TARGET"]
+
     res_dict = {}
     # Loop through each primer pair and get the frequencies of alternate alleles, storing in dict
     for i in range(len(primer_df.columns)):
         res_dict[i] = _get_primer_alt_frequencies(
-            primer_df, gdna_pos, i, sample_set, assay_type, contig, sample_query
+            primer_df, gdna_pos, i, sample_sets, assay_type, contig, sample_query
         )
 
     # Plot data with plotly
@@ -248,9 +264,8 @@ def plot_primer_ag3_frequencies(
         res_dict=res_dict,
         name=name,
         assay_type=assay_type,
-        sample_set=sample_set,
-        target_loc=target_loc,
-        transcript=transcript,
+        sample_sets=sample_sets,
+        target=target,
         out_dir=out_dir,
     )
 
@@ -260,7 +275,6 @@ def plot_primer_ag3_frequencies(
 def plot_primer_locs(
     primer_res_dict,
     primer_df,
-    gff,
     contig,
     seq_parameters,
     assay_type,
@@ -273,15 +287,17 @@ def plot_primer_locs(
     oligos, _ = _return_oligo_list(assay_type)
     assay_name = seq_parameters["SEQUENCE_ID"]
     # Load geneset (gff)
+    gff = ag3.geneset()
     if any(item in assay_type for item in ["gDNA", "probe"]):
-        start = seq_parameters["GENOMIC_SEQUENCE_TARGET"] - 500
-        end = seq_parameters["GENOMIC_SEQUENCE_TARGET"] + 500
+        start = seq_parameters["GENOMIC_TARGET"] - 500
+        end = seq_parameters["GENOMIC_TARGET"] + 500
         locgff, min_, max_, genegff = _get_gDNA_locs(gff, contig, start, end)
         min_ = np.min([min_, start])
         max_ = np.max([max_, end])
     elif assay_type == "cDNA primers":
-        transcript = seq_parameters["TRANSCRIPT"]
-        locgff, min_, max_, genegff = _get_qPCR_locs(gff, contig, transcript)
+        locgff, min_, max_, genegff = _get_qPCR_locs(
+            gff, contig, seq_parameters["GENOMIC_TARGET"]
+        )
 
     if locgff.empty:
         print("No exons in close proximity for loc plot")
@@ -446,22 +462,44 @@ def gget_blat_genome(primer_df, assay_type, assembly="anoGam3"):
         print("No HITs found for these primer pairs")
 
 
+def check_and_split_target(target):
+    # split contig from target
+    if target.startswith("AGAP"):
+        gff = ag3.geneset()
+        assert (
+            target in gff["ID"].to_list()
+        ), f"requested target {target} not in ag3 transcript set"
+        contig = gff.query("ID == @target")["contig"].unique()[0]
+        return (contig, target)
+    else:
+        contig, target = target.split(":")
+        assert contig in [
+            "2L",
+            "2R",
+            "3L",
+            "3R",
+            "X",
+        ], "target contig not recognised, should be 2L, 2R, 3L, 3R or X"
+        return (contig, int(target))
+
+
 def designPrimers(
     assay_type,
     assay_name,
     min_amplicon_size,
     max_amplicon_size,
     n_primer_pairs,
-    contig,
     target,
     primer_parameters,
-    sample_set,
+    sample_sets,
     sample_query=None,
     out_dir=None,
 ):
     """
     Run whole AgamPrimer workflow to design primers/probes with in one function
     """
+
+    contig, target = check_and_split_target(target)
 
     amplicon_size_range = [[min_amplicon_size, max_amplicon_size]]
     # adds some necessary parameters depending on assay type
@@ -489,40 +527,21 @@ def designPrimers(
         assert target.startswith(
             "AGAP"
         ), "cDNA primers chosen but an AGAP identifier is not provided as the target"
-        transcript = target
-        target_loc = ""
     else:
         assert isinstance(
             target, int
         ), "For genomic DNA the target should be an integer within the contig"
-        transcript = ""
-        target_loc = target
 
     genome_seq = ag3.genome_sequence(region=contig)
     print(f"Our genome sequence for {contig} is {genome_seq.shape[0]} bp long")
 
-    if any(item in assay_type for item in ["gDNA", "probe"]):
-        # genomic DNA
-        target_sequence, gdna_pos, seq_parameters = prepare_gDNA_sequence(
-            target_loc=target_loc,
-            amplicon_size_range=amplicon_size_range,
-            genome_seq=genome_seq,
-            assay_name=assay_name,
-            assay_type=assay_type,
-        )
-    elif assay_type == "cDNA primers":
-        # RT-quantitative PCR, cDNA
-        (
-            target_sequence,
-            exon_junctions,
-            gdna_pos,
-            seq_parameters,
-        ) = prepare_cDNA_sequence(
-            transcript=transcript,
-            gff=ag3.geneset(),
-            genome_seq=genome_seq,
-            assay_name=assay_name,
-        )
+    target_sequence, gdna_pos, seq_parameters = prepare_sequence(
+        target=target,
+        assay_type=assay_type,
+        assay_name=assay_name,
+        genome_seq=genome_seq,
+        amplicon_size_range=amplicon_size_range,
+    )
 
     primer_dict = primer3.designPrimers(
         seq_args=seq_parameters, global_args=primer_parameters
@@ -538,7 +557,7 @@ def designPrimers(
         primer_df=primer_df,
         gdna_pos=gdna_pos,
         contig=contig,
-        sample_set=sample_set,
+        sample_sets=sample_sets,
         sample_query=sample_query,
         assay_type=assay_type,
         seq_parameters=seq_parameters,
@@ -548,7 +567,6 @@ def designPrimers(
         primer_res_dict=results_dict,
         primer_df=primer_df,
         assay_type=assay_type,
-        gff=ag3.geneset(),
         contig=contig,
         seq_parameters=seq_parameters,
         legend_loc="lower left",
@@ -559,12 +577,12 @@ def designPrimers(
     return (primer_df, blat_df)
 
 
-def _get_primer_arrays(contig, gdna_pos, sample_set, assay_type, sample_query=None):
+def _get_primer_arrays(contig, gdna_pos, sample_sets, assay_type, sample_query=None):
 
     if any(item in assay_type for item in ["gDNA", "probe"]):
         span_str = f"{contig}:{gdna_pos.min()}-{gdna_pos.max()}"
         snps = ag3.snp_calls(
-            region=span_str, sample_sets=sample_set, sample_query=sample_query
+            region=span_str, sample_sets=sample_sets, sample_query=sample_query
         )  # get genotypes
         ref_alt_arr = snps["variant_allele"].compute().values
         geno = snps["call_genotype"]
@@ -578,7 +596,7 @@ def _get_primer_arrays(contig, gdna_pos, sample_set, assay_type, sample_query=No
         for span in exon_spans:
             span_str = f"{contig}:{span[0]}-{span[1]}"
             snps = ag3.snp_calls(
-                region=span_str, sample_sets=sample_set, sample_query=sample_query
+                region=span_str, sample_sets=sample_sets, sample_query=sample_query
             )  # get genotypes
             ref_alts = snps["variant_allele"]
             geno = snps["call_genotype"]
@@ -596,7 +614,7 @@ def _get_primer_arrays(contig, gdna_pos, sample_set, assay_type, sample_query=No
 
 
 def _get_primer_alt_frequencies(
-    primer_df, gdna_pos, pair, sample_set, assay_type, contig, sample_query
+    primer_df, gdna_pos, pair, sample_sets, assay_type, contig, sample_query
 ):
     """
     Find the genomic locations of pairs of primers, and runs span_to_freq
@@ -607,7 +625,7 @@ def _get_primer_alt_frequencies(
     base_freqs, ref_alt_arr, pos_arr = _get_primer_arrays(
         contig=contig,
         gdna_pos=gdna_pos,
-        sample_set=sample_set,
+        sample_sets=sample_sets,
         assay_type=assay_type,
         sample_query=sample_query,
     )
@@ -654,9 +672,8 @@ def _plotly_primers(
     res_dict,
     name,
     assay_type,
-    sample_set,
-    target_loc,
-    transcript,
+    sample_sets,
+    target,
     out_dir=None,
 ):
 
@@ -801,11 +818,11 @@ def _plotly_primers(
                 fig.update_yaxes(row=row_i, col=idx, title="Alternate allele frequency")
 
     if any(item in assay_type for item in ["gDNA"]):
-        title_text = f"{name} primer pairs | {sample_set} | target {target_loc} bp"
+        title_text = f"{name} primer pairs | {sample_sets} | target {target} bp"
     elif assay_type == "probe":
-        title_text = f"{name} probe | {sample_set} | target {target_loc} bp"
+        title_text = f"{name} probe | {sample_sets} | target {target} bp"
     elif assay_type == "cDNA primers":
-        title_text = f"{name} primer pairs | {sample_set} | target {transcript}"
+        title_text = f"{name} primer pairs | {sample_sets} | target {target}"
 
     # fig.update_traces(customdata=customdata, hovertemplate=hovertemplate)
     fig.update_layout(
