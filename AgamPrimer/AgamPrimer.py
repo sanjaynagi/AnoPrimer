@@ -462,9 +462,12 @@ def gget_blat_genome(primer_df, assay_type, assembly="anoGam3"):
         print("No HITs found for these primer pairs")
 
 
-def check_and_split_target(target):
+def check_and_split_target(target, assay_type):
     # split contig from target
     if target.startswith("AGAP"):
+        assert (
+            assay_type == "cDNA primers"
+        ), "an AGAP identifier is specified, but the assay type is not cDNA primers. Please provide a contig:position identifier for gDNA primers."
         gff = ag3.geneset()
         assert (
             target in gff["ID"].to_list()
@@ -472,6 +475,9 @@ def check_and_split_target(target):
         contig = gff.query("ID == @target")["contig"].unique()[0]
         return (contig, target)
     else:
+        assert isinstance(
+            target, str
+        ), "For genomic DNA the target should be a string, such as '2L:28545767'"
         contig, target = target.split(":")
         assert contig in [
             "2L",
@@ -499,9 +505,10 @@ def designPrimers(
     Run whole AgamPrimer workflow to design primers/probes with in one function
     """
 
-    contig, target = check_and_split_target(target)
-
+    # check target is valid for assay type and find contig
+    contig, target = check_and_split_target(target=target, assay_type=assay_type)
     amplicon_size_range = [[min_amplicon_size, max_amplicon_size]]
+
     # adds some necessary parameters depending on assay type
     if primer_parameters == "default":
         primer_parameters = primer_params(
@@ -519,19 +526,7 @@ def designPrimers(
             amplicon_size_range=amplicon_size_range,
             generate_defaults=False,
         )
-
-    if assay_type == "cDNA primers":
-        assert not isinstance(
-            target, int
-        ), "cDNA primers chosen but an AGAP identifier is not provided as the target"
-        assert target.startswith(
-            "AGAP"
-        ), "cDNA primers chosen but an AGAP identifier is not provided as the target"
-    else:
-        assert isinstance(
-            target, int
-        ), "For genomic DNA the target should be an integer within the contig"
-
+    # load genome sequence
     genome_seq = ag3.genome_sequence(region=contig)
     print(f"Our genome sequence for {contig} is {genome_seq.shape[0]} bp long")
 
@@ -543,16 +538,31 @@ def designPrimers(
         amplicon_size_range=amplicon_size_range,
     )
 
+    # run primer3
     primer_dict = primer3.designPrimers(
         seq_args=seq_parameters, global_args=primer_parameters
     )
+
+    if assay_type != "probe":
+        # check if primer3 has returned any primers
+        if int(primer_dict["PRIMER_PAIR_EXPLAIN"][-1]) == 0:
+            print(
+                f"No primers found for {assay_name}. For cDNA primers, this is more likely to occur if the target contains only one exon-exon junction."
+            )
+            print(
+                "see troubleshooting below for more information. We suggest relaxing the primer parameters"
+            )
+            return primer3_run_statistics(primer_dict, assay_type)
+
     # AgamPrimer.primer3_run_statistics(primer_dict, assay_type)
     primer_df = primer3_to_pandas(primer_dict=primer_dict, assay_type=assay_type)
 
+    # write primer3 output to file
     if out_dir:
         primer_df.to_csv(f"{out_dir}/{assay_name}.{assay_type}.tsv", sep="\t")
         primer_df.to_excel(f"{out_dir}/{assay_name}.{assay_type}.xlsx")
 
+    # plot frequencies of alleles in primer pairs
     results_dict = plot_primer_ag3_frequencies(
         primer_df=primer_df,
         gdna_pos=gdna_pos,
@@ -563,6 +573,7 @@ def designPrimers(
         seq_parameters=seq_parameters,
         out_dir=out_dir,
     )
+    # plot primer locations on genome
     plot_primer_locs(
         primer_res_dict=results_dict,
         primer_df=primer_df,
@@ -572,6 +583,7 @@ def designPrimers(
         legend_loc="lower left",
         out_dir=out_dir,
     )
+    # check primers for specificity against the genome and write to file
     blat_df = gget_blat_genome(primer_df, assay_type, assembly="anoGam3")
     blat_df.to_csv(f"{out_dir}/{assay_name}.{assay_type}.blat.tsv", sep="\t")
     return (primer_df, blat_df)
