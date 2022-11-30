@@ -15,6 +15,9 @@ Primer design in *Anopheles gambiae s.l* taking into account SNP variation in pr
 
 #### Release notes
 
+- 0.5.12 - for cDNA primers, designing over exon-exon junctions is now optional due to `cDNA_exon_junction` argument. Docstring added to `designPrimers()`. 
+- 0.5.11 - feedback on troubleshooting now provided in `designPrimers()` function if primer design fails
+- 0.5.10 - region string provided instead of contig 
 - 0.5.9 - 'cDNA primers' replaces 'qPCR primers' throughout.
 - 0.5.8 - Two notebooks, short and long, including all in one function. can now check the primers for specificity with gget blat implementation. Most versions >0.4.0  were for a workshop and github actions CI.
 - 0.4.0 - plot_primer_ag3_frequencies() now uses plotly to make an interactive plot, where one can hover over primer bases, which returns the exact frequency for each base.
