@@ -61,7 +61,7 @@ def prepare_gDNA_sequence(
     return (target_sequence, gdna_pos, seq_parameters)
 
 
-def prepare_cDNA_sequence(transcript, genome_seq, assay_name):
+def prepare_cDNA_sequence(transcript, genome_seq, assay_name, cDNA_exon_junction):
     """
     Extract exonic sequence for our transcript and record exon-exon junctions
     """
@@ -86,14 +86,25 @@ def prepare_cDNA_sequence(transcript, genome_seq, assay_name):
     seq_parameters = {
         "SEQUENCE_ID": assay_name,
         "SEQUENCE_TEMPLATE": target_mRNA_seq,
-        "SEQUENCE_OVERLAP_JUNCTION_LIST": list(map(int, exon_junctions)),
         "GENOMIC_TARGET": transcript,
     }
+
+    if cDNA_exon_junction:
+        seq_parameters["SEQUENCE_OVERLAP_JUNCTION_LIST"] = list(
+            map(int, exon_junctions)
+        )
 
     return (target_mRNA_seq, gdna_pos, seq_parameters)
 
 
-def prepare_sequence(target, assay_type, assay_name, genome_seq, amplicon_size_range):
+def prepare_sequence(
+    target,
+    assay_type,
+    assay_name,
+    genome_seq,
+    amplicon_size_range,
+    cDNA_exon_junction=True,
+):
     """
     Prepare the sequence for primer3, depending on cDNA or gDNA input type
     """
@@ -110,7 +121,10 @@ def prepare_sequence(target, assay_type, assay_name, genome_seq, amplicon_size_r
     elif assay_type == "cDNA primers":
         # quantitative PCR
         target_sequence, gdna_pos, seq_parameters = prepare_cDNA_sequence(
-            transcript=target, genome_seq=genome_seq, assay_name=assay_name
+            transcript=target,
+            genome_seq=genome_seq,
+            assay_name=assay_name,
+            cDNA_exon_junction=cDNA_exon_junction,
         )
 
     return (target_sequence, gdna_pos, seq_parameters)
@@ -500,9 +514,52 @@ def designPrimers(
     sample_sets,
     sample_query=None,
     out_dir=None,
+    cDNA_exon_junction=True,
 ):
     """
     Run whole AgamPrimer workflow to design primers/probes with in one function
+
+    Parameters
+    ----------
+    assay_type: {'gDNA primers', 'cDNA primers', 'gDNA primers + probe', 'probe}, str
+        The type of oligos we wish to design. If 'gDNA primers' or 'cDNA primers' are specified,
+        then only primers will be designed. If 'gDNA primers + probe' is specified, then primers
+        and a probe will be designed. If 'probe' is specified, then only an internal probe will
+        be designed.
+    assay_name : str
+        A name to give the assay, used for naming output files.
+    min_amplicon_size : int
+        The minimum size of the amplicon we wish to design primers for.
+    max_amplicon_size : int
+        The maximum size of the amplicon we wish to design primers for. cDNA primers for gene
+        expression assays should be designed with a max amplicon size of ~120.
+    n_primer_pairs : int
+        The number of primer pairs to design.
+    target : str
+        The target to design primers for. For gDNA primers, this should be a contig:position string,
+        for example '2L:28545767'. For cDNA primers, this should be an AGAP identifier.
+    primer_parameters : dict or 'default'
+        A dictionary of primer3 parameters to use for primer design. If 'default' is specified, default
+        primer3 parameters will be generated.
+    sample_sets : str or list of str, optional
+        Can be a sample set identifier (e.g., "AG1000G-AO") or a list of
+        sample set identifiers (e.g., ["AG1000G-BF-A", "AG1000G-BF-B"]) or a
+        release identifier (e.g., "3.0") or a list of release identifiers.
+    sample_query: str, optional
+        A pandas query string which will be evaluated against the sample
+        metadata e.g., "taxon == 'coluzzii' and country == 'Burkina Faso'".
+    out_dir : str, optional
+        The directory to write output files to. If not specified, outputs will not be written to file.
+    cDNA_exon_junction : bool, optional
+        If True, cDNA primers will be designed to span an exon-exon junction. We strongly recommend
+        that this is set to True. In the case of gDNA primers, this parameter is ignored.
+
+        Returns
+        -------
+        primer_df : pandas.DataFrame
+            A pandas DataFrame containing the primer sequences and their information.
+        blat_df : pandas.DataFrame
+            A pandas DataFrame containing the BLAT alignment information for the primers.
     """
 
     # check target is valid for assay type and find contig
@@ -536,6 +593,7 @@ def designPrimers(
         assay_name=assay_name,
         genome_seq=genome_seq,
         amplicon_size_range=amplicon_size_range,
+        cDNA_exon_junction=cDNA_exon_junction,
     )
 
     # run primer3
@@ -547,12 +605,10 @@ def designPrimers(
         # check if primer3 has returned any primers
         if int(primer_dict["PRIMER_PAIR_EXPLAIN"][-1]) == 0:
             print(
-                f"No primers found for {assay_name}. For cDNA primers, this is more likely to occur if the target contains only one exon-exon junction."
+                f"No primers found for {assay_name}. For cDNA primers, this is more likely to occur if the target contains only one exon-exon junction. see troubleshooting below for more information. We suggest relaxing the primer parameters \n"
             )
-            print(
-                "see troubleshooting below for more information. We suggest relaxing the primer parameters"
-            )
-            return primer3_run_statistics(primer_dict, assay_type)
+            print(primer3_run_statistics(primer_dict, assay_type))
+            return (None, None)
 
     # AgamPrimer.primer3_run_statistics(primer_dict, assay_type)
     primer_df = primer3_to_pandas(primer_dict=primer_dict, assay_type=assay_type)
