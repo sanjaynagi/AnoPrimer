@@ -1,0 +1,9 @@
+{
+    "assay_type":"cDNA primers",
+    "assay_name":"CPLCG7",
+    "min_amplicon_size": 60,
+    "max_amplicon_size": 100,
+    "n_primer_pairs":6,
+    "target": "AGAP028081-RA",
+    "cDNA_exon_junction" : "False"
+}
