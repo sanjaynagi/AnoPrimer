@@ -506,7 +506,7 @@ def designPrimers(
     """
 
     # check target is valid for assay type and find contig
-    contig, target = check_and_split_target(target)
+    contig, target = check_and_split_target(target=target, assay_type=assay_type)
     amplicon_size_range = [[min_amplicon_size, max_amplicon_size]]
 
     # adds some necessary parameters depending on assay type
