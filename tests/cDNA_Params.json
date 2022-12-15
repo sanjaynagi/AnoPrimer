@@ -4,5 +4,5 @@
     "min_amplicon_size": 60,
     "max_amplicon_size": 120,
     "n_primer_pairs":6,
-    "target": "AGAP006228-RA"
+    "primer_target": "AGAP006228-RA"
 }

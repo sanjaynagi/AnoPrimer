@@ -4,6 +4,6 @@
     "min_amplicon_size": 60,
     "max_amplicon_size": 100,
     "n_primer_pairs":6,
-    "target": "AGAP028081-RA",
+    "primer_target": "AGAP028081-RA",
     "cDNA_exon_junction" : false
 }

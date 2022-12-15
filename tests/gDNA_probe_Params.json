@@ -4,5 +4,5 @@
     "min_amplicon_size": 60,
     "max_amplicon_size": 100,
     "n_primer_pairs":4,
-    "target": "2L:2422652"
+    "primer_target": "2L:2422652"
 }
