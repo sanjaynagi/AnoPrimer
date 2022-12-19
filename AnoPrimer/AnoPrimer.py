@@ -11,6 +11,19 @@ from matplotlib import patches
 from plotly.subplots import make_subplots
 
 ag3 = malariagen_data.Ag3(url="gs://vo_agam_release/", pre=True)
+af1 = malariagen_data.Af1(url="gs://vo_afun_release/", pre=True)
+
+
+def retrieve_data_resource(species):
+    assert species in [
+        "gambiae_sl",
+        "funestus",
+    ], f"species {species} not recognised, please use 'gambiae_sl' or 'funestus'"
+    if species == "gambiae_sl":
+        data_resource = ag3
+    elif species == "funestus":
+        data_resource = af1
+    return data_resource
 
 
 def prepare_gDNA_sequence(
@@ -61,12 +74,16 @@ def prepare_gDNA_sequence(
     return (target_sequence, gdna_pos, seq_parameters)
 
 
-def prepare_cDNA_sequence(transcript, genome_seq, assay_name, cDNA_exon_junction):
+def prepare_cDNA_sequence(
+    species, transcript, genome_seq, assay_name, cDNA_exon_junction
+):
     """
     Extract exonic sequence for our transcript and record exon-exon junctions
     """
     # subset gff to your gene
-    gff = ag3.geneset()
+    data_resource = retrieve_data_resource(species)
+
+    gff = data_resource.geneset()
     gff = gff.query("type == 'exon' & Parent == @transcript")
     # Get fasta sequence for each of our exons, and remember gDNA position
     seq = dict()
@@ -98,6 +115,7 @@ def prepare_cDNA_sequence(transcript, genome_seq, assay_name, cDNA_exon_junction
 
 
 def prepare_sequence(
+    species,
     target,
     assay_type,
     assay_name,
@@ -121,6 +139,7 @@ def prepare_sequence(
     elif assay_type == "cDNA primers":
         # quantitative PCR
         target_sequence, gdna_pos, seq_parameters = prepare_cDNA_sequence(
+            species=species,
             transcript=target,
             genome_seq=genome_seq,
             assay_name=assay_name,
@@ -245,7 +264,8 @@ def primer3_to_pandas(primer_dict, assay_type):
     return primer_df
 
 
-def plot_primer_ag3_frequencies(
+def plot_primer_snp_frequencies(
+    species,
     primer_df,
     gdna_pos,
     contig,
@@ -269,7 +289,14 @@ def plot_primer_ag3_frequencies(
     # Loop through each primer pair and get the frequencies of alternate alleles, storing in dict
     for i in range(len(primer_df.columns)):
         res_dict[i] = _get_primer_alt_frequencies(
-            primer_df, gdna_pos, i, sample_sets, assay_type, contig, sample_query
+            species=species,
+            primer_df=primer_df,
+            gdna_pos=gdna_pos,
+            pair=i,
+            sample_sets=sample_sets,
+            assay_type=assay_type,
+            contig=contig,
+            sample_query=sample_query,
         )
 
     # Plot data with plotly
@@ -287,6 +314,7 @@ def plot_primer_ag3_frequencies(
 
 
 def plot_primer_locs(
+    species,
     primer_res_dict,
     primer_df,
     contig,
@@ -298,10 +326,11 @@ def plot_primer_locs(
     """
     Plot the position of the primer sets in relation to any nearby exons
     """
+    data_resource = retrieve_data_resource(species=species)
     oligos, _ = _return_oligo_list(assay_type)
     assay_name = seq_parameters["SEQUENCE_ID"]
     # Load geneset (gff)
-    gff = ag3.geneset()
+    gff = data_resource.geneset()
     if any(item in assay_type for item in ["gDNA", "probe"]):
         start = seq_parameters["GENOMIC_TARGET"] - 500
         end = seq_parameters["GENOMIC_TARGET"] + 500
@@ -476,16 +505,19 @@ def gget_blat_genome(primer_df, assay_type, assembly="anoGam3"):
         print("No HITs found for these primer pairs")
 
 
-def check_and_split_target(target, assay_type):
+def check_and_split_target(species, target, assay_type):
+
+    data_resource = retrieve_data_resource(species=species)
+
     # split contig from target
-    if target.startswith("AGAP"):
+    if target.startswith("AGAP") or target.startswith("AFUN"):
         assert (
             assay_type == "cDNA primers"
-        ), "an AGAP identifier is specified, but the assay type is not cDNA primers. Please provide a contig:position identifier for gDNA primers."
-        gff = ag3.geneset()
+        ), "an AGAP/AFUN identifier is specified, but the assay type is not cDNA primers. Please provide a contig:position identifier for gDNA primers."
+        gff = data_resource.geneset()
         assert (
             target in gff["ID"].to_list()
-        ), f"requested target {target} not in ag3 transcript set"
+        ), f"requested target {target} not in ag3/af1 transcript set"
         contig = gff.query("ID == @target")["contig"].unique()[0]
         return (contig, target)
     else:
@@ -504,6 +536,7 @@ def check_and_split_target(target, assay_type):
 
 
 def designPrimers(
+    species,
     assay_type,
     assay_name,
     min_amplicon_size,
@@ -562,6 +595,8 @@ def designPrimers(
             A pandas DataFrame containing the BLAT alignment information for the primers.
     """
 
+    data_resource = retrieve_data_resource(species=species)
+
     # check target is valid for assay type and find contig
     contig, target = check_and_split_target(target=target, assay_type=assay_type)
     amplicon_size_range = [[min_amplicon_size, max_amplicon_size]]
@@ -584,7 +619,7 @@ def designPrimers(
             generate_defaults=False,
         )
     # load genome sequence
-    genome_seq = ag3.genome_sequence(region=contig)
+    genome_seq = data_resource.genome_sequence(region=contig)
     print(f"Our genome sequence for {contig} is {genome_seq.shape[0]} bp long")
 
     target_sequence, gdna_pos, seq_parameters = prepare_sequence(
@@ -619,7 +654,8 @@ def designPrimers(
         primer_df.to_excel(f"{out_dir}/{assay_name}.{assay_type}.xlsx")
 
     # plot frequencies of alleles in primer pairs
-    results_dict = plot_primer_ag3_frequencies(
+    results_dict = plot_primer_snp_frequencies(
+        species=species,
         primer_df=primer_df,
         gdna_pos=gdna_pos,
         contig=contig,
@@ -631,6 +667,7 @@ def designPrimers(
     )
     # plot primer locations on genome
     plot_primer_locs(
+        species=species,
         primer_res_dict=results_dict,
         primer_df=primer_df,
         assay_type=assay_type,
@@ -639,17 +676,25 @@ def designPrimers(
         legend_loc="lower left",
         out_dir=out_dir,
     )
-    # check primers for specificity against the genome and write to file
-    blat_df = gget_blat_genome(primer_df, assay_type, assembly="anoGam3")
-    blat_df.to_csv(f"{out_dir}/{assay_name}.{assay_type}.blat.tsv", sep="\t")
-    return (primer_df, blat_df)
+
+    if species == "gambiae_sl":
+        # check primers for specificity against the genome and write to file
+        blat_df = gget_blat_genome(primer_df, assay_type, assembly="anoGam3")
+        blat_df.to_csv(f"{out_dir}/{assay_name}.{assay_type}.blat.tsv", sep="\t")
+        return (primer_df, blat_df)
+    else:
+        return (primer_df, "Cannot BLAT against funestus, gambiae_sl only")
 
 
-def _get_primer_arrays(contig, gdna_pos, sample_sets, assay_type, sample_query=None):
+def _get_primer_arrays(
+    species, contig, gdna_pos, sample_sets, assay_type, sample_query=None
+):
+
+    data_resource = retrieve_data_resource(species=species)
 
     if any(item in assay_type for item in ["gDNA", "probe"]):
         span_str = f"{contig}:{gdna_pos.min()}-{gdna_pos.max()}"
-        snps = ag3.snp_calls(
+        snps = data_resource.snp_calls(
             region=span_str, sample_sets=sample_sets, sample_query=sample_query
         )  # get genotypes
         ref_alt_arr = snps["variant_allele"].compute().values
@@ -663,7 +708,7 @@ def _get_primer_arrays(contig, gdna_pos, sample_sets, assay_type, sample_query=N
         exon_spans = np.array(_consecutive(gdna_pos)) + 1
         for span in exon_spans:
             span_str = f"{contig}:{span[0]}-{span[1]}"
-            snps = ag3.snp_calls(
+            snps = data_resource.snp_calls(
                 region=span_str, sample_sets=sample_sets, sample_query=sample_query
             )  # get genotypes
             ref_alts = snps["variant_allele"]
@@ -682,7 +727,7 @@ def _get_primer_arrays(contig, gdna_pos, sample_sets, assay_type, sample_query=N
 
 
 def _get_primer_alt_frequencies(
-    primer_df, gdna_pos, pair, sample_sets, assay_type, contig, sample_query
+    species, primer_df, gdna_pos, pair, sample_sets, assay_type, contig, sample_query
 ):
     """
     Find the genomic locations of pairs of primers, and runs span_to_freq
@@ -691,6 +736,7 @@ def _get_primer_alt_frequencies(
 
     oligos, _ = _return_oligo_list(assay_type)
     base_freqs, ref_alt_arr, pos_arr = _get_primer_arrays(
+        species=species,
         contig=contig,
         gdna_pos=gdna_pos,
         sample_sets=sample_sets,

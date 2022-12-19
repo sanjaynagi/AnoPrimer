@@ -1,5 +1,5 @@
 {
-    "species" : "gambiae_sl",
+    "species" : "funestus",
     "assay_type":"probe",
     "assay_name":"ChromX_probe",
     "min_amplicon_size": 180,

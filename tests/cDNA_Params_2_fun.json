@@ -1,10 +1,10 @@
 {
-    "species" : "gambiae_sl",
+    "species" : "funestus",
     "assay_type":"cDNA primers",
-    "assay_name":"CPLCG7",
+    "assay_name":"cyp6p9a",
     "min_amplicon_size": 60,
     "max_amplicon_size": 100,
     "n_primer_pairs":6,
-    "primer_target": "AGAP028081-RA",
+    "primer_target": "AFUN015792-RA",
     "cDNA_exon_junction" : false
 }
