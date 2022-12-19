@@ -525,13 +525,20 @@ def check_and_split_target(species, target, assay_type):
             target, str
         ), "For genomic DNA the target should be a string, such as '2L:28545767'"
         contig, target = target.split(":")
-        assert contig in [
-            "2L",
-            "2R",
-            "3L",
-            "3R",
-            "X",
-        ], "target contig not recognised, should be 2L, 2R, 3L, 3R or X"
+        if species == "gambiae_sl":
+            assert contig in [
+                "2L",
+                "2R",
+                "3L",
+                "3R",
+                "X",
+            ], "target contig not recognised, should be 2L, 2R, 3L, 3R or X"
+        elif species == "funestus":
+            assert contig in [
+                "2RL",
+                "3RL",
+                "X",
+            ], "target contig not recognised, should be 2RL, 3RL or X"
         return (contig, int(target))
 
 
@@ -544,7 +551,7 @@ def designPrimers(
     n_primer_pairs,
     target,
     primer_parameters,
-    sample_sets,
+    sample_sets=None,
     sample_query=None,
     out_dir=None,
     cDNA_exon_junction=True,
@@ -598,7 +605,9 @@ def designPrimers(
     data_resource = retrieve_data_resource(species=species)
 
     # check target is valid for assay type and find contig
-    contig, target = check_and_split_target(target=target, assay_type=assay_type)
+    contig, target = check_and_split_target(
+        species=species, target=target, assay_type=assay_type
+    )
     amplicon_size_range = [[min_amplicon_size, max_amplicon_size]]
 
     # adds some necessary parameters depending on assay type
@@ -623,6 +632,7 @@ def designPrimers(
     print(f"Our genome sequence for {contig} is {genome_seq.shape[0]} bp long")
 
     target_sequence, gdna_pos, seq_parameters = prepare_sequence(
+        species=species,
         target=target,
         assay_type=assay_type,
         assay_name=assay_name,
