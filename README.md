@@ -6,6 +6,7 @@
 [![Execute notebook](https://github.com/sanjaynagi/AgamPrimer/workflows/Execute%20notebook/badge.svg)](https://github.com/sanjaynagi/AgamPrimer/actions?query=workflow:"Execute+notebook")
 [![GitHub release](https://img.shields.io/github/release/sanjaynagi/AgamPrimer?include_prereleases=&sort=semver&color=blue)](https://github.com/sanjaynagi/AgamPrimer/releases/)
 [![License](https://img.shields.io/badge/License-MIT-blue)](#license)
+[![Twitter Follow](https://img.shields.io/twitter/follow/sanjay_c_nagi.svg?style=social)](https://twitter.com/sanjay_c_nagi)
 
 </div>
 
