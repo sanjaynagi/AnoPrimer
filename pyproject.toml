@@ -27,6 +27,7 @@ notebook = "*"
 jupyterlab = "*"
 snakeviz = "*"
 papermill = "*"
+ipykernel = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
