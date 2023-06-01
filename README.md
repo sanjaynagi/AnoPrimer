@@ -3,7 +3,7 @@
 [<img src="https://github.com/sanjaynagi/AgamPrimer/blob/main/graphics/AgamPrimer_logo.png?raw=True" width="400"/>](https://github.com/sanjaynagi/AgamPrimer/blob/main/graphics/AgamPrimer_logo.png?raw=True)   
 
 [![DOI](https://zenodo.org/badge/503315581.svg)](https://zenodo.org/badge/latestdoi/503315581)
-[![Execute notebook](https://github.com/sanjaynagi/AgamPrimer/workflows/Execute%20notebook/badge.svg)](https://github.com/sanjaynagi/AgamPrimer/actions?query=workflow:"Execute+notebook")
+[![Execute notebooks](https://github.com/sanjaynagi/AgamPrimer/workflows/Execute%20notebooks/badge.svg)](https://github.com/sanjaynagi/AgamPrimer/actions?query=workflow:"Execute+notebook")
 [![GitHub release](https://img.shields.io/github/release/sanjaynagi/AgamPrimer?include_prereleases=&sort=semver&color=blue)](https://github.com/sanjaynagi/AgamPrimer/releases/)
 [![License](https://img.shields.io/badge/License-MIT-blue)](#license)
 [![Twitter Follow](https://img.shields.io/twitter/follow/sanjay_c_nagi.svg?style=social)](https://twitter.com/sanjay_c_nagi)
