@@ -22,6 +22,8 @@ Primer design in *Anopheles gambiae s.l* taking into account SNP variation in pr
 
 #### Release notes
 
+- 0.6.1 - Adds support for primer3-py 2.0.0 and pins this version to future-proof.
+- 0.6.0 - Adds support for python 3.10 and 3.11
 - 0.5.12 - for cDNA primers, designing over exon-exon junctions is now optional due to `cDNA_exon_junction` argument. Docstring added to `designPrimers()`. 
 - 0.5.11 - feedback on troubleshooting now provided in `designPrimers()` function if primer design fails
 - 0.5.10 - region string provided instead of contig 
