@@ -12,7 +12,7 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.12"
-primer3-py = "*"
+primer3-py = "2.0.0"
 malariagen_data = "*"
 openpyxl = "*"
 gget = "*"
