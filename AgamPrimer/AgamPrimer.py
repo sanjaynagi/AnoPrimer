@@ -137,7 +137,6 @@ def primer_params(
     amplicon_size_range=None,
     generate_defaults=False,
 ):
-
     """
     adds necessary parameters depending on assay_type, or can
     generate the default parameters
@@ -646,7 +645,6 @@ def designPrimers(
 
 
 def _get_primer_arrays(contig, gdna_pos, sample_sets, assay_type, sample_query=None):
-
     if any(item in assay_type for item in ["gDNA", "probe"]):
         span_str = f"{contig}:{gdna_pos.min()}-{gdna_pos.max()}"
         snps = ag3.snp_calls(
@@ -744,7 +742,6 @@ def _plotly_primers(
     target,
     out_dir=None,
 ):
-
     oligos, _ = _return_oligo_list(assay_type)
     if len(oligos) == 2:
         plt_title = ["Forward primer", "Reverse primer"]
@@ -933,13 +930,13 @@ def _get_qPCR_locs(gff, contig, transcript):
 def _return_oligo_list(assay_type):
     if assay_type == "probe":
         oligos = ["probe"]
-        row_start = 5
+        row_start = 9
     elif any(item == assay_type for item in ["gDNA primers", "cDNA primers"]):
         oligos = ["forward", "reverse"]
-        row_start = 7
+        row_start = 11
     elif assay_type == "gDNA primers + probe":
         oligos = ["forward", "reverse", "probe"]
-        row_start = 8
+        row_start = 12
     return (oligos, row_start)
 
 

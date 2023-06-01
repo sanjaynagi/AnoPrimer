@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "AgamPrimer"
-version = "0.6.0"
+version = "0.6.1"
 description = "A package to design primers in Anopheles gambiae whilst considering genetic variation with malariagen_data"
 authors = [
     "Sanjay Nagi <sanjay.nagi@lstmed.ac.uk>",
@@ -12,7 +12,7 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.12"
-primer3-py = "*"
+primer3-py = "2.0.0"
 malariagen_data = "*"
 openpyxl = "*"
 gget = "*"
