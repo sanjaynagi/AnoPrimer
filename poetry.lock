@@ -2893,14 +2893,14 @@ webpdf = ["pyppeteer (>=1,<1.1)"]
 
 [[package]]
 name = "nbformat"
-version = "5.8.0"
+version = "5.9.0"
 description = "The Jupyter Notebook format"
 category = "dev"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "nbformat-5.8.0-py3-none-any.whl", hash = "sha256:d910082bd3e0bffcf07eabf3683ed7dda0727a326c446eeb2922abe102e65162"},
-    {file = "nbformat-5.8.0.tar.gz", hash = "sha256:46dac64c781f1c34dfd8acba16547024110348f9fc7eab0f31981c2a3dc48d1f"},
+    {file = "nbformat-5.9.0-py3-none-any.whl", hash = "sha256:8c8fa16d6d05062c26177754bfbfac22de644888e2ef69d27ad2a334cf2576e5"},
+    {file = "nbformat-5.9.0.tar.gz", hash = "sha256:e98ebb6120c3efbafdee2a40af2a140cadee90bb06dd69a2a63d9551fcc7f976"},
 ]
 
 [package.dependencies]
@@ -3617,26 +3617,26 @@ virtualenv = ">=20.10.0"
 
 [[package]]
 name = "primer3-py"
-version = "1.2.2"
+version = "2.0.0"
 description = "Python bindings for Primer3"
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "primer3-py-1.2.2.tar.gz", hash = "sha256:c133030df3743ca4b6fa180a83b0fde1e970c4e26439ccd6b972dce592b04047"},
-    {file = "primer3_py-1.2.2-cp310-cp310-macosx_10_14_x86_64.whl", hash = "sha256:7206e491ba187d4c90210c5d489b6e5f4a319919fdc69c4900fb379829ab1957"},
-    {file = "primer3_py-1.2.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ce2b457600642464b90ad63b58e6fbca9ce6338e3b0816b0067e10f9f57a1944"},
-    {file = "primer3_py-1.2.2-cp310-cp310-win_amd64.whl", hash = "sha256:c7480c8cc109403f4a4047247ff90a4569799bdd70db0997d2ec34bfddd2ccca"},
-    {file = "primer3_py-1.2.2-cp311-cp311-macosx_10_14_x86_64.whl", hash = "sha256:4543c6f9242ccee390acdab00f1c1255521fb6bb86c0daa860f1cfbb301368c8"},
-    {file = "primer3_py-1.2.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:67c2f78a1d27ee8b49149d9c21d2c0933840057016a40761c44f70906eb69664"},
-    {file = "primer3_py-1.2.2-cp311-cp311-win_amd64.whl", hash = "sha256:719e6f29537e73bfa117c9b9503b14b4a378aeee32445d7546c8e760f0595934"},
-    {file = "primer3_py-1.2.2-cp38-cp38-macosx_10_14_x86_64.whl", hash = "sha256:33d7857295dee3482b8276555aed1e70ce00802682a44d543e12ce5830fdac6c"},
-    {file = "primer3_py-1.2.2-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:640ff3b7357477d151ddae156aad3fa15b7d95894687996f9f1bbccb5b65b385"},
-    {file = "primer3_py-1.2.2-cp38-cp38-win_amd64.whl", hash = "sha256:ee8943ecf3a5754aaf78716f714490c70891ef34067d8bf0da08beb4e5427adb"},
-    {file = "primer3_py-1.2.2-cp39-cp39-macosx_10_14_x86_64.whl", hash = "sha256:11f4369ad2c573ab2a294290abe16648889ebc23d32b575e63e627d79fdb5f2b"},
-    {file = "primer3_py-1.2.2-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:3f64019e3ae584811461175407592f986f6b790bd573ca294ce017974053d7a0"},
-    {file = "primer3_py-1.2.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6b3a622565a920ba9038ed23e7d46f2032ad084664b375e6464f59ebd6f1e0a3"},
-    {file = "primer3_py-1.2.2-cp39-cp39-win_amd64.whl", hash = "sha256:2c3126dcc7a2665105d8cc7e3bdc3fcf9349ef468d4cbacc5e3b7fc106c19892"},
+    {file = "primer3-py-2.0.0.tar.gz", hash = "sha256:3c1b217cd72b1d9bd0fce4aee45d7f5e3f7b1e6c6889cbdc5ea97bdc72e009ef"},
+    {file = "primer3_py-2.0.0-cp310-cp310-macosx_10_14_x86_64.whl", hash = "sha256:48aa239192ebd21dbc06670c0b2b852fa4c89d0fe31b5f065b7636160a657551"},
+    {file = "primer3_py-2.0.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e82d6c9f96250f0f6fcb0338b7940205c860890d547d8530b98c5cae9922f226"},
+    {file = "primer3_py-2.0.0-cp310-cp310-win_amd64.whl", hash = "sha256:08f194be5a9c6d628f4ebfa90abcf6ddb4a17d84bcc0a9cbac5f187ed4b60679"},
+    {file = "primer3_py-2.0.0-cp311-cp311-macosx_10_14_x86_64.whl", hash = "sha256:e232612f97fcf00c44bf4e885335d33773c68b39be02abc3bc8559fae686e51a"},
+    {file = "primer3_py-2.0.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7308148cd9482dcf9213b9eac94e6e729b7b56deb80ad8e7103294197ec34a4f"},
+    {file = "primer3_py-2.0.0-cp311-cp311-win_amd64.whl", hash = "sha256:e6a40a4eae245800d902666246dd2bc34cdec24515b6987a5f3d3b639c2b42cb"},
+    {file = "primer3_py-2.0.0-cp38-cp38-macosx_10_14_x86_64.whl", hash = "sha256:5b5eb6a80105fb60b2a28b64f9eab3a8baa2f2370f9385822c327523f9c24898"},
+    {file = "primer3_py-2.0.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:2aa5c11f837999efaa0f3a55cdcfadba56e569aac9f057de7d444a22c1f841dc"},
+    {file = "primer3_py-2.0.0-cp38-cp38-win_amd64.whl", hash = "sha256:744918204f7fb6d918a0bc2f0dbfbf28c46af62e7e4419c0a8c436189a6c99c9"},
+    {file = "primer3_py-2.0.0-cp39-cp39-macosx_10_14_x86_64.whl", hash = "sha256:0c04931d746279aa8807143cd3ac876a962261c5f3ef8215a52af708e72f634c"},
+    {file = "primer3_py-2.0.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:fd0d0b2998f3b177b5a07ee331446bbc4e728a2d27cdedb79463f54e24981007"},
+    {file = "primer3_py-2.0.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a9bdd3ddb031d3ce875e5db60016f262fcb0fe019f926ecbf4843dd844314820"},
+    {file = "primer3_py-2.0.0-cp39-cp39-win_amd64.whl", hash = "sha256:c57b608a2b1a8f33e905c00bd6496d3ab82232a671fd6566274b80b760e7fe48"},
 ]
 
 [[package]]
@@ -4989,4 +4989,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "c6af2aea2cd90ffa882baf778822e841fe1e173886f714e523853eb492080ec0"
+content-hash = "78a87a4d0dc3ff3f69209f8431564a00a7bb90bf44057b2b0aa8f529c938c758"
