@@ -562,6 +562,7 @@ def designPrimers(
     """
 
     # check target is valid for assay type and find contig
+    oligos, _ = _return_oligo_list(assay_type)
     contig, target = check_and_split_target(target=target, assay_type=assay_type)
     amplicon_size_range = [[min_amplicon_size, max_amplicon_size]]
 
@@ -612,11 +613,6 @@ def designPrimers(
     # AgamPrimer.primer3_run_statistics(primer_dict, assay_type)
     primer_df = primer3_to_pandas(primer_dict=primer_dict, assay_type=assay_type)
 
-    # write primer3 output to file
-    if out_dir:
-        primer_df.to_csv(f"{out_dir}/{assay_name}.{assay_type}.tsv", sep="\t")
-        primer_df.to_excel(f"{out_dir}/{assay_name}.{assay_type}.xlsx")
-
     # plot frequencies of alleles in primer pairs
     results_dict = plot_primer_ag3_frequencies(
         primer_df=primer_df,
@@ -628,6 +624,7 @@ def designPrimers(
         seq_parameters=seq_parameters,
         out_dir=out_dir,
     )
+
     # plot primer locations on genome
     plot_primer_locs(
         primer_res_dict=results_dict,
@@ -638,9 +635,33 @@ def designPrimers(
         legend_loc="lower left",
         out_dir=out_dir,
     )
+
+    # add genomic span to primer_df
+    spans = []
+    for oligo in oligos:
+        for i in range(len(primer_df.columns)):
+            start = int(results_dict[i][oligo]["position"].min())
+            end = int(results_dict[i][oligo]["position"].max())
+            span = f"{start}-{end}"
+            spans.append(span)
+
+    spans = np.array(spans).reshape(len(oligos), len(primer_df.columns))
+    spans_df = pd.DataFrame(spans)
+    spans_df.index = [f"{o}_genomic_span" for o in oligos]
+    spans_df.columns = primer_df.columns
+    primer_df = pd.concat([primer_df, spans_df], axis=0).drop(
+        index=[f"primer_{o}" for o in oligos]
+    )
+
     # check primers for specificity against the genome and write to file
     blat_df = gget_blat_genome(primer_df, assay_type, assembly="anoGam3")
-    blat_df.to_csv(f"{out_dir}/{assay_name}.{assay_type}.blat.tsv", sep="\t")
+
+    # write primer3 and blat output to file
+    if out_dir:
+        primer_df.to_csv(f"{out_dir}/{assay_name}.{assay_type}.tsv", sep="\t")
+        primer_df.to_excel(f"{out_dir}/{assay_name}.{assay_type}.xlsx")
+        blat_df.to_csv(f"{out_dir}/{assay_name}.{assay_type}.blat.tsv", sep="\t")
+
     return (primer_df, blat_df)
 
 
