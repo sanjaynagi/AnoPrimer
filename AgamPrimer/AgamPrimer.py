@@ -642,7 +642,7 @@ def designPrimers(
         for i in range(len(primer_df.columns)):
             start = int(results_dict[i][oligo]["position"].min())
             end = int(results_dict[i][oligo]["position"].max())
-            span = f"{start}-{end}"
+            span = f"{contig}:{start}-{end}"
             spans.append(span)
 
     spans = np.array(spans).reshape(len(oligos), len(primer_df.columns))
