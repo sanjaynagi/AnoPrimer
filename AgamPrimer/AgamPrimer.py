@@ -650,7 +650,7 @@ def designPrimers(
     spans_df.index = [f"{o}_genomic_span" for o in oligos]
     spans_df.columns = primer_df.columns
     primer_df = pd.concat([primer_df, spans_df], axis=0).drop(
-        index=["primer_forward", "primer_reverse"]
+        index=[f"primer_{o}" for o in oligos]
     )
 
     # check primers for specificity against the genome and write to file
