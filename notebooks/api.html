@@ -1,0 +1,721 @@
+
+
+<!DOCTYPE html>
+
+
+<html >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>AgamPrimer API</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js"></script>
+    <script kind="utterances">
+
+    var commentsRunWhenDOMLoaded = cb => {
+    if (document.readyState != 'loading') {
+        cb()
+    } else if (document.addEventListener) {
+        document.addEventListener('DOMContentLoaded', cb)
+    } else {
+        document.attachEvent('onreadystatechange', function() {
+        if (document.readyState == 'complete') cb()
+        })
+    }
+}
+
+var addUtterances = () => {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = "https://utteranc.es/client.js";
+    script.async = "async";
+
+    script.setAttribute("repo", "sanjaynagi/AgamPrimer");
+    script.setAttribute("issue-term", "pathname");
+    script.setAttribute("theme", "github-light");
+    script.setAttribute("label", "comment");
+    script.setAttribute("crossorigin", "anonymous");
+
+    sections = document.querySelectorAll("div.section");
+    if (sections !== null) {
+        section = sections[sections.length-1];
+        section.appendChild(script);
+    }
+}
+commentsRunWhenDOMLoaded(addUtterances);
+</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="../_static/sphinx-thebe.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/api';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Notebooks" href="notebooks.html" />
+    <link rel="prev" title="AgamPrimer" href="../landing-page.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="None"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="../landing-page.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../_static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../landing-page.html">
+                    AgamPrimer
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Usage</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">AgamPrimer API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notebooks.html">Notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting_contributing.html">Troubleshooting</a></li>
+
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/sanjaynagi.github.io/AgamPrimer" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/sanjaynagi.github.io/AgamPrimer/issues/new?title=Issue%20on%20page%20%2Fnotebooks/api.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/notebooks/api.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>AgamPrimer API</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#designprimers">designPrimers()</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-primer-ag3-frequencies">plot_primer_ag3_frequencies()</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-primer-locs">plot_primer_locs()</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gget-blat-genome">gget_blat_genome()</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#primer-params">primer_params()</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#primer3-to-pandas">primer3_to_pandas()</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#primer3-run-statistics">primer3_run_statistics()</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="agamprimer-api">
+<h1>AgamPrimer API<a class="headerlink" href="#agamprimer-api" title="Permalink to this headline">#</a></h1>
+<p>This notebook provides an overview of the API for the AgamPrimer python package, to design primers in <em>Anopheles</em> mosquitoes whilst considering genomic variation.</p>
+<section id="designprimers">
+<h2>designPrimers()<a class="headerlink" href="#designprimers" title="Permalink to this headline">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="AgamPrimer.AgamPrimer.designPrimers">
+<span class="sig-prename descclassname"><span class="pre">AgamPrimer.</span></span><span class="sig-name descname"><span class="pre">designPrimers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_amplicon_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_amplicon_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_primer_pairs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primer_parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_sets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_query</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cDNA_exon_junction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AgamPrimer.AgamPrimer.designPrimers" title="Permalink to this definition">#</a></dt>
+<dd><p>Run whole AgamPrimer workflow to design primers/probes with in one function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>assay_type</strong> (<em>{'gDNA primers'</em><em>, </em><em>'cDNA primers'</em><em>, </em><em>'gDNA primers + probe'</em><em>, </em><em>'probe}</em><em>, </em><em>str</em>) – The type of oligos we wish to design. If ‘gDNA primers’ or ‘cDNA primers’ are specified,
+then only primers will be designed. If ‘gDNA primers + probe’ is specified, then primers
+and a probe will be designed. If ‘probe’ is specified, then only an internal probe will
+be designed.</p></li>
+<li><p><strong>assay_name</strong> (<em>str</em>) – A name to give the assay, used for naming output files.</p></li>
+<li><p><strong>min_amplicon_size</strong> (<em>int</em>) – The minimum size of the amplicon we wish to design primers for.</p></li>
+<li><p><strong>max_amplicon_size</strong> (<em>int</em>) – The maximum size of the amplicon we wish to design primers for. cDNA primers for gene
+expression assays should be designed with a max amplicon size of ~120.</p></li>
+<li><p><strong>n_primer_pairs</strong> (<em>int</em>) – The number of primer pairs to design.</p></li>
+<li><p><strong>target</strong> (<em>str</em>) – The target to design primers for. For gDNA primers, this should be a contig:position string,
+for example ‘2L:28545767’. For cDNA primers, this should be an AGAP identifier.</p></li>
+<li><p><strong>primer_parameters</strong> (<em>dict</em><em> or </em><em>'default'</em>) – A dictionary of primer3 parameters to use for primer design. If ‘default’ is specified, default
+primer3 parameters will be generated.</p></li>
+<li><p><strong>sample_sets</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Can be a sample set identifier (e.g., “AG1000G-AO”) or a list of
+sample set identifiers (e.g., [“AG1000G-BF-A”, “AG1000G-BF-B”]) or a
+release identifier (e.g., “3.0”) or a list of release identifiers.</p></li>
+<li><p><strong>sample_query</strong> (<em>str</em><em>, </em><em>optional</em>) – A pandas query string which will be evaluated against the sample
+metadata e.g., “taxon == ‘coluzzii’ and country == ‘Burkina Faso’”.</p></li>
+<li><p><strong>out_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – The directory to write output files to. If not specified, outputs will not be written to file.</p></li>
+<li><p><strong>cDNA_exon_junction</strong> (<em>bool</em><em>, </em><em>optional</em>) – <p>If True, cDNA primers will be designed to span an exon-exon junction. We strongly recommend
+that this is set to True. In the case of gDNA primers, this parameter is ignored.</p>
+<dl class="field-list simple">
+<dt class="field-odd">returns</dt>
+<dd class="field-odd"><ul>
+<li><p><strong>primer_df</strong> (<em>pandas.DataFrame</em>) – A pandas DataFrame containing the primer sequences and their information.</p></li>
+<li><p><strong>blat_df</strong> (<em>pandas.DataFrame</em>) – A pandas DataFrame containing the BLAT alignment information for the primers.</p></li>
+</ul>
+</dd>
+</dl>
+</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="plot-primer-ag3-frequencies">
+<h2>plot_primer_ag3_frequencies()<a class="headerlink" href="#plot-primer-ag3-frequencies" title="Permalink to this headline">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="AgamPrimer.AgamPrimer.plot_primer_ag3_frequencies">
+<span class="sig-prename descclassname"><span class="pre">AgamPrimer.</span></span><span class="sig-name descname"><span class="pre">plot_primer_ag3_frequencies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primer_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gdna_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_sets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq_parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_query</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AgamPrimer.AgamPrimer.plot_primer_ag3_frequencies" title="Permalink to this definition">#</a></dt>
+<dd><p>Loop through n primer pairs, retrieving frequency data and plot allele frequencies</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>primer_df</strong> (<em>pandas.DataFrame</em>) – A pandas DataFrame containing the primer sequences and their information, returned by primer3_to_pandas()</p></li>
+<li><p><strong>gdna_pos</strong> (<em>numpy.ndarray</em>) – The genomic positions of the target sequence</p></li>
+<li><p><strong>contig</strong> (<em>str</em>) – The contig of the target sequence, e.g. ‘2L’</p></li>
+<li><p><strong>sample_sets</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Can be a sample set identifier (e.g., “AG1000G-AO”) or a list of
+sample set identifiers (e.g., [“AG1000G-BF-A”, “AG1000G-BF-B”]) or a
+release identifier (e.g., “3.0”) or a list of release identifiers.</p></li>
+<li><p><strong>assay_type</strong> (<em>str</em>) – The type of assay, either ‘gDNA primers’ or ‘gDNA primers + probe’, ‘cDNA primers’
+or ‘probe’</p></li>
+<li><p><strong>seq_parameters</strong> (<em>dict</em>) – A dictionary of parameters for primer3, returned by prepare_sequence()</p></li>
+<li><p><strong>out_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – The directory to write output files to. If not specified, outputs will not be written to file.</p></li>
+<li><p><strong>sample_query</strong> (<em>str</em><em>, </em><em>optional</em>) – A pandas query string which will be evaluated against the sample
+metadata e.g., “taxon == ‘coluzzii’ and country == ‘Burkina Faso’” to subset
+the genotypes to a specific set of samples.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="plot-primer-locs">
+<h2>plot_primer_locs()<a class="headerlink" href="#plot-primer-locs" title="Permalink to this headline">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="AgamPrimer.AgamPrimer.plot_primer_locs">
+<span class="sig-prename descclassname"><span class="pre">AgamPrimer.</span></span><span class="sig-name descname"><span class="pre">plot_primer_locs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primer_res_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primer_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq_parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_loc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'best'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AgamPrimer.AgamPrimer.plot_primer_locs" title="Permalink to this definition">#</a></dt>
+<dd><p>Plot the position of the primer sets in relation to any nearby exons</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>primer_res_dict</strong> (<em>dict</em>) – A dictionary containing the primer3 results, returned by primer3.designPrimers()</p></li>
+<li><p><strong>primer_df</strong> (<em>pandas.DataFrame</em>) – A pandas DataFrame containing the primer sequences and their information, returned by primer3_to_pandas()</p></li>
+<li><p><strong>contig</strong> (<em>str</em>) – The contig of the target sequence, e.g. ‘2L’</p></li>
+<li><p><strong>seq_parameters</strong> (<em>dict</em>) – A dictionary of parameters for primer3, returned by prepare_sequence()</p></li>
+<li><p><strong>assay_type</strong> (<em>str</em>) – The type of assay, either ‘gDNA primers’ or ‘gDNA primers + probe’, ‘cDNA primers’
+or ‘probe’</p></li>
+<li><p><strong>legend_loc</strong> (<em>str</em><em>, </em><em>optional</em>) – The location of the legend in the plot. Can be ‘best’, ‘upper right’, ‘upper left’, ‘lower left’, ‘lower right’, ‘right’, ‘center left’, ‘center right’, ‘lower center’, ‘upper center’ or ‘center’.</p></li>
+<li><p><strong>out_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – The directory to write output files to. If not specified, outputs will not be written to file.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="gget-blat-genome">
+<h2>gget_blat_genome()<a class="headerlink" href="#gget-blat-genome" title="Permalink to this headline">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="AgamPrimer.AgamPrimer.gget_blat_genome">
+<span class="sig-prename descclassname"><span class="pre">AgamPrimer.</span></span><span class="sig-name descname"><span class="pre">gget_blat_genome</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primer_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'anoGam3'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AgamPrimer.AgamPrimer.gget_blat_genome" title="Permalink to this definition">#</a></dt>
+<dd><p>Aligns primers to the AgamP3 genome with BLAT.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>primer_df</strong> (<em>pandas.DataFrame</em>) – A pandas DataFrame containing the primer sequences and their information, returned by primer3_to_pandas()</p></li>
+<li><p><strong>assay_type</strong> (<em>str</em>) – The type of assay, either ‘gDNA primers’ or ‘gDNA primers + probe’, ‘cDNA primers’
+or ‘probe’</p></li>
+<li><p><strong>assembly</strong> (<em>str</em><em>, </em><em>optional</em>) – The genome assembly to use with Blat. ‘anoGam3’ is Anopheles gambiae. Please see the gget documentation for more information.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="primer-params">
+<h2>primer_params()<a class="headerlink" href="#primer-params" title="Permalink to this headline">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="AgamPrimer.AgamPrimer.primer_params">
+<span class="sig-prename descclassname"><span class="pre">AgamPrimer.</span></span><span class="sig-name descname"><span class="pre">primer_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primer_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_primer_pairs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplicon_size_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generate_defaults</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AgamPrimer.AgamPrimer.primer_params" title="Permalink to this definition">#</a></dt>
+<dd><p>adds necessary parameters depending on assay_type, or can
+generate the default parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>assay_type</strong> (<em>str</em>) – The type of assay, either ‘gDNA primers’ or ‘gDNA primers + probe’, ‘cDNA primers’
+or ‘probe’</p></li>
+<li><p><strong>primer_parameters</strong> (<em>dict</em>) – A dictionary of primer3 parameters to use for primer design. If ‘default’ is specified, default
+primer3 parameters will be generated.</p></li>
+<li><p><strong>n_primer_pairs</strong> (<em>int</em>) – The number of primer pairs to design.</p></li>
+<li><p><strong>amplicon_size_range</strong> (<em>list</em>) – The minimum and maximum size of the amplicon to design primers for</p></li>
+<li><p><strong>generate_defaults</strong> (<em>bool</em>) – If True, default primer3 parameters will be generated.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="primer3-to-pandas">
+<h2>primer3_to_pandas()<a class="headerlink" href="#primer3-to-pandas" title="Permalink to this headline">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="AgamPrimer.AgamPrimer.primer3_to_pandas">
+<span class="sig-prename descclassname"><span class="pre">AgamPrimer.</span></span><span class="sig-name descname"><span class="pre">primer3_to_pandas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primer_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AgamPrimer.AgamPrimer.primer3_to_pandas" title="Permalink to this definition">#</a></dt>
+<dd><p>Convert primer3 results to pandas dataframe</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>primer_dict</strong> (<em>dict</em>) – The primer3 results dictionary returned by primer3.designPrimers()</p></li>
+<li><p><strong>assay_type</strong> (<em>str</em>) – The type of assay, either ‘gDNA primers’ or ‘gDNA primers + probe’, ‘cDNA primers’
+or ‘probe’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>primer_df</strong> – A pandas DataFrame containing the primer sequences and their information.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="primer3-run-statistics">
+<h2>primer3_run_statistics()<a class="headerlink" href="#primer3-run-statistics" title="Permalink to this headline">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="AgamPrimer.AgamPrimer.primer3_run_statistics">
+<span class="sig-prename descclassname"><span class="pre">AgamPrimer.</span></span><span class="sig-name descname"><span class="pre">primer3_run_statistics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primer_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AgamPrimer.AgamPrimer.primer3_run_statistics" title="Permalink to this definition">#</a></dt>
+<dd><p>Prints out primer3 run statistics from the primer3 results dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>primer_dict</strong> (<em>dict</em>) – The primer3 results dictionary returned by primer3.designPrimers()</p></li>
+<li><p><strong>assay_type</strong> (<em>str</em>) – The type of assay, either ‘gDNA primers’ or ‘gDNA primers + probe’, ‘cDNA primers’
+or ‘probe’</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./notebooks"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../landing-page.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">AgamPrimer</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="notebooks.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Notebooks</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#designprimers">designPrimers()</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-primer-ag3-frequencies">plot_primer_ag3_frequencies()</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-primer-locs">plot_primer_locs()</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gget-blat-genome">gget_blat_genome()</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#primer-params">primer_params()</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#primer3-to-pandas">primer3_to_pandas()</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#primer3-run-statistics">primer3_run_statistics()</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Sanjay Curtis Nagi
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
