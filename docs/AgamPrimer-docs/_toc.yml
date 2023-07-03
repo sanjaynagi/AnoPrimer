@@ -1,0 +1,8 @@
+format: jb-book
+root: landing-page
+parts:
+- caption: Usage
+  chapters:
+    - file: notebooks/api
+    - file: notebooks/notebooks
+    - file: notebooks/troubleshooting_contributing
