@@ -23,6 +23,20 @@ def prepare_gDNA_sequence(
 ):
     """
     Extracts sequence of interest from genome sequence
+
+    PARAMETERS
+    ----------
+    target_loc : int
+        The target location of the SNP in the genome sequence
+    amplicon_size_range : list
+        The minimum and maximum size of the amplicon to design primers for
+    genome_seq : dask.array.core.Array
+        The genome sequence from ag3.genome_sequence()
+    assay_name : str
+        The name of the assay
+    assay_type : str
+        The type of assay, either 'gDNA primers' or 'gDNA primers + probe', 'cDNA primers'
+        or 'probe'
     """
     target = int(target_loc)
     # Set up range for the input sequence, we'll take the max range
@@ -64,7 +78,19 @@ def prepare_gDNA_sequence(
 def prepare_cDNA_sequence(transcript, genome_seq, assay_name, cDNA_exon_junction):
     """
     Extract exonic sequence for our transcript and record exon-exon junctions
+
+    PARAMETERS
+    ----------
+    transcript : str
+        The AGAP identifier of the transcript to design primers for
+    genome_seq : dask.array.core.Array
+        The genome sequence from ag3.genome_sequence()
+    assay_name : str
+        The name of the assay
+    cDNA_exon_junction : bool
+        If True, cDNA primers will be designed to span an exon-exon junction. We strongly recommend for qPCR purposes.
     """
+
     # subset gff to your gene
     gff = ag3.geneset()
     gff = gff.query("type == 'exon' & Parent == @transcript")
@@ -107,6 +133,23 @@ def prepare_sequence(
 ):
     """
     Prepare the sequence for primer3, depending on cDNA or gDNA input type
+
+    PARAMETERS
+    ----------
+    target : str
+        The target to design primers for. For gDNA primers, this should be a contig:position string,
+        for example '2L:28545767'. For cDNA primers, this should be an AGAP identifier.
+    assay_type : str
+        The type of assay, either 'gDNA primers' or 'gDNA primers + probe', 'cDNA primers'
+        or 'probe'
+    assay_name : str
+        The name of the assay
+    genome_seq : dask.array.core.Array
+        The genome sequence from ag3.genome_sequence()
+    amplicon_size_range : list
+        The minimum and maximum size of the amplicon to design primers for
+    cDNA_exon_junction : bool
+        If True, cDNA primers will be designed to span an exon-exon junction. We strongly recommend for qPCR purposes.
     """
 
     if any(item in assay_type for item in ["gDNA", "probe"]):
@@ -140,6 +183,21 @@ def primer_params(
     """
     adds necessary parameters depending on assay_type, or can
     generate the default parameters
+
+    PARAMETERS
+    ----------
+    assay_type : str
+        The type of assay, either 'gDNA primers' or 'gDNA primers + probe', 'cDNA primers'
+        or 'probe'
+    primer_parameters : dict
+        A dictionary of primer3 parameters to use for primer design. If 'default' is specified, default
+        primer3 parameters will be generated.
+    n_primer_pairs : int
+        The number of primer pairs to design.
+    amplicon_size_range : list
+        The minimum and maximum size of the amplicon to design primers for
+    generate_defaults : bool
+        If True, default primer3 parameters will be generated.
     """
 
     if generate_defaults:
@@ -184,7 +242,15 @@ def primer_params(
 
 def primer3_run_statistics(primer_dict, assay_type):
     """
-    Prints out primer3 run statistics from the primer3 results dictionary
+    Prints out primer3 run statistics from the primer3 results dictionary.
+
+    PARAMETERS
+    ----------
+    primer_dict : dict
+        The primer3 results dictionary returned by primer3.designPrimers()
+    assay_type : str
+        The type of assay, either 'gDNA primers' or 'gDNA primers + probe', 'cDNA primers'
+        or 'probe'
     """
     _, row_start = _return_oligo_list(assay_type)
     primer_dict = _convert_results_dict_naming(primer_dict)
@@ -206,6 +272,19 @@ def primer3_run_statistics(primer_dict, assay_type):
 def primer3_to_pandas(primer_dict, assay_type):
     """
     Convert primer3 results to pandas dataframe
+
+    PARAMETERS
+    ----------
+    primer_dict : dict
+        The primer3 results dictionary returned by primer3.designPrimers()
+    assay_type : str
+        The type of assay, either 'gDNA primers' or 'gDNA primers + probe', 'cDNA primers'
+        or 'probe'
+
+    RETURNS
+    -------
+    primer_df : pandas.DataFrame
+        A pandas DataFrame containing the primer sequences and their information.
     """
     oligos, row_start = _return_oligo_list(assay_type)
     # Convert the dict into a pandas dataframe
@@ -256,6 +335,30 @@ def plot_primer_ag3_frequencies(
 ):
     """
     Loop through n primer pairs, retrieving frequency data and plot allele frequencies
+
+    PARAMETERS
+    ----------
+    primer_df : pandas.DataFrame
+        A pandas DataFrame containing the primer sequences and their information, returned by primer3_to_pandas()
+    gdna_pos : numpy.ndarray
+        The genomic positions of the target sequence
+    contig : str
+        The contig of the target sequence, e.g. '2L'
+    sample_sets : str or list of str, optional
+        Can be a sample set identifier (e.g., "AG1000G-AO") or a list of
+        sample set identifiers (e.g., ["AG1000G-BF-A", "AG1000G-BF-B"]) or a
+        release identifier (e.g., "3.0") or a list of release identifiers.
+    assay_type : str
+        The type of assay, either 'gDNA primers' or 'gDNA primers + probe', 'cDNA primers'
+        or 'probe'
+    seq_parameters : dict
+        A dictionary of parameters for primer3, returned by prepare_sequence()
+    out_dir : str, optional
+        The directory to write output files to. If not specified, outputs will not be written to file.
+    sample_query: str, optional
+        A pandas query string which will be evaluated against the sample
+        metadata e.g., "taxon == 'coluzzii' and country == 'Burkina Faso'" to subset
+        the genotypes to a specific set of samples.
     """
 
     if sample_query is not None:
@@ -296,6 +399,24 @@ def plot_primer_locs(
 ):
     """
     Plot the position of the primer sets in relation to any nearby exons
+
+    PARAMETERS
+    ----------
+    primer_res_dict : dict
+        A dictionary containing the primer3 results, returned by primer3.designPrimers()
+    primer_df : pandas.DataFrame
+        A pandas DataFrame containing the primer sequences and their information, returned by primer3_to_pandas()
+    contig : str
+        The contig of the target sequence, e.g. '2L'
+    seq_parameters : dict
+        A dictionary of parameters for primer3, returned by prepare_sequence()
+    assay_type : str
+        The type of assay, either 'gDNA primers' or 'gDNA primers + probe', 'cDNA primers'
+        or 'probe'
+    legend_loc : str, optional
+        The location of the legend in the plot. Can be 'best', 'upper right', 'upper left', 'lower left', 'lower right', 'right', 'center left', 'center right', 'lower center', 'upper center' or 'center'.
+    out_dir : str, optional
+        The directory to write output files to. If not specified, outputs will not be written to file.
     """
     oligos, _ = _return_oligo_list(assay_type)
     assay_name = seq_parameters["SEQUENCE_ID"]
@@ -449,6 +570,16 @@ def plot_primer_locs(
 def gget_blat_genome(primer_df, assay_type, assembly="anoGam3"):
     """
     Aligns primers to the AgamP3 genome with BLAT.
+
+    PARAMETERS
+    ----------
+    primer_df : pandas.DataFrame
+        A pandas DataFrame containing the primer sequences and their information, returned by primer3_to_pandas()
+    assay_type : str
+        The type of assay, either 'gDNA primers' or 'gDNA primers + probe', 'cDNA primers'
+        or 'probe'
+    assembly : str, optional
+        The genome assembly to use with Blat. 'anoGam3' is Anopheles gambiae. Please see the gget documentation for more information.
     """
     oligos, _ = _return_oligo_list(assay_type=assay_type)
 
