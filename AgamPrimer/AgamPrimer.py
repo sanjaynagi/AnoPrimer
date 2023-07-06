@@ -734,7 +734,7 @@ def designPrimers(
 
     if assay_type != "probe":
         # check if primer3 has returned any primers
-        if int(extract_trailing_digits(primer_dict["PRIMER_PAIR_EXPLAIN"])):
+        if int(extract_trailing_digits(primer_dict["PRIMER_PAIR_EXPLAIN"])) == 0:
             print(
                 f"No primers found for {assay_name}. For cDNA primers, this is more likely to occur if the target contains only one exon-exon junction. see troubleshooting below for more information. We suggest relaxing the primer parameters \n"
             )
