@@ -93,7 +93,7 @@ def prepare_cDNA_sequence(transcript, genome_seq, assay_name, cDNA_exon_junction
 
     # subset gff to your gene
     gff = ag3.geneset()
-    gff = gff.query("type == 'exon' & Parent == @transcript")
+    gff = gff.query(f"type == 'exon' & Parent == {transcript}")
     # Get fasta sequence for each of our exons, and remember gDNA position
     seq = dict()
     gdna_pos = dict()
@@ -616,7 +616,7 @@ def check_and_split_target(target, assay_type):
         assert (
             target in gff["ID"].to_list()
         ), f"requested target {target} not in ag3 transcript set"
-        contig = gff.query("ID == @target")["contig"].unique()[0]
+        contig = gff.query(f"ID == {target}")["contig"].unique()[0]
         return (contig, target)
     else:
         assert isinstance(
@@ -1068,23 +1068,23 @@ def _plotly_primers(
 
 def _get_gDNA_locs(gff, contig, start, end):
     locgff = gff.query(
-        "contig == @contig & type == 'exon' & start < @end & end > @start"
+        f"contig == {contig} & type == 'exon' & start < {end} & end > {start}"
     )
     min_ = locgff.start.min() - 100
     max_ = locgff.end.max() + 100
     genegff = gff.query(
-        "contig == @contig & type == 'gene' & start < @end & end > @start"
+        f"contig == {contig} & type == 'gene' & start < {end} & end > {start}"
     )
     return (locgff, min_, max_, genegff)
 
 
 def _get_qPCR_locs(gff, contig, transcript):
     # Load geneset (gff)
-    locgff = gff.query("Parent == @transcript & type == 'exon'")
+    locgff = gff.query(f"Parent == {transcript} & type == 'exon'")
     min_ = locgff.start.min() - 200
     max_ = locgff.end.max() + 200
     genegff = gff.query(
-        "contig == @contig & type == 'gene' & start > @min_ & end < @max_"
+        f"contig == {contig} & type == 'gene' & start > {min_} & end < {max_}"
     )
     return (locgff, min_, max_, genegff)
 
