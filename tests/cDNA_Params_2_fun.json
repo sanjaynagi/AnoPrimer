@@ -5,6 +5,6 @@
     "min_amplicon_size": 60,
     "max_amplicon_size": 100,
     "n_primer_pairs":6,
-    "primer_target": "AFUN015792-RA",
+    "primer_target": "LOC125764713_t1",
     "cDNA_exon_junction" : false
 }

@@ -5,5 +5,5 @@
     "min_amplicon_size": 60,
     "max_amplicon_size": 120,
     "n_primer_pairs":6,
-    "primer_target": "AFUN015792-RA"
+    "primer_target": "LOC125764713_t1"
 }
