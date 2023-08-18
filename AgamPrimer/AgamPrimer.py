@@ -647,7 +647,7 @@ def check_and_split_target(species, target, assay_type):
     data_resource = retrieve_data_resource(species=species)
 
     # split contig from target
-    if target.startswith("AGAP") or target.startswith("AFUN"):
+    if target.startswith("AGAP") or target.startswith("LOC"):
         assert (
             assay_type == "cDNA primers"
         ), "an AGAP/AFUN identifier is specified, but the assay type is not cDNA primers. Please provide a contig:position identifier for gDNA primers."
