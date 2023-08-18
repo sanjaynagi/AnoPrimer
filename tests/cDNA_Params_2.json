@@ -6,5 +6,6 @@
     "max_amplicon_size": 100,
     "n_primer_pairs":6,
     "primer_target": "AGAP028081-RA",
-    "cDNA_exon_junction" : false
+    "cDNA_exon_junction" : false,
+    "sample_sets": "AG1000G-GH"
 }

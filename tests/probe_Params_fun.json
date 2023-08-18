@@ -5,5 +5,6 @@
     "min_amplicon_size": 180,
     "max_amplicon_size": 240,
     "n_primer_pairs":6,
-    "primer_target": "X:9500000"
+    "primer_target": "X:9500000",
+    "sample_sets": "1236-VO-TZ-OKUMU-VMF00090"
 }
