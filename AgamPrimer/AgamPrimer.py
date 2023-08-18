@@ -457,6 +457,10 @@ def plot_primer_locs(
     data_resource = retrieve_data_resource(species=species)
     oligos, _ = _return_oligo_list(assay_type)
     assay_name = seq_parameters["SEQUENCE_ID"]
+    exon_id_col = (
+        "Name" if species == "gambiae_sl" else "ID"
+    )  # funestus gff3 uses ID for exon name, gambiae uses Name
+
     # Load geneset (gff)
     gff = data_resource.geneset()
     if any(item in assay_type for item in ["gDNA", "probe"]):
@@ -496,7 +500,7 @@ def plot_primer_locs(
     # Add rectangles for exons one at a time
     for _, exon in locgff.iterrows():
         ex_start, ex_end = exon[["start", "end"]]
-        e_name = exon["Name"][-2:]
+        e_name = exon[exon_id_col][-2:]
         strand = exon["strand"]
         if strand == "+":
             rect = patches.Rectangle(
