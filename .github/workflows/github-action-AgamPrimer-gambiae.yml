@@ -1,4 +1,4 @@
-name: Execute notebooks
+name: notebooks-gambiae
 
 on:
   push:
