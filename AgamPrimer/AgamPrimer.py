@@ -1227,3 +1227,137 @@ def _get_base_freqs(freqs, ref_alt_array):
             base = ref_alt_array[i, i_base]
             freq_df.loc[i, f"{base}_freq"] = freqs[i, i_base]
     return freq_df
+
+
+### check my oligos ###
+
+
+def check_my_oligo(
+    sequence, sample_sets="3.0", sample_query=None, width=700, height=400
+):
+    """
+    Align a sequence to AgamP3, retrieve ag3 frequencies in this region and plot.
+    Only works with An.gambiae_sl for now.
+    """
+
+    print("Aligning sequence to AgamP3 genome with BLAT")
+    blat_df = gget.blat(sequence=sequence, seqtype="DNA", assembly="anoGam3")
+    if blat_df is None:
+        print(f"No hit for {sequence}")
+        return
+
+    contig, start, end = blat_df.loc[0, ["chromosome", "start", "end"]]
+    contig = contig.replace("chr", "")
+    region_span = f"{contig}:{start}-{end}"
+    print("plotting frequencies in ag3 data")
+    fig = plot_sequence_frequencies(
+        region=region_span,
+        sample_sets=sample_sets,
+        sample_query=sample_query,
+        width=width,
+        height=height,
+    )
+
+
+def plot_sequence_frequencies(
+    region, sample_sets=None, sample_query=None, width=700, height=400
+):
+    """Retrieve frequencies"""
+
+    snps = ag3.snp_calls(
+        region=region, sample_sets=sample_sets, sample_query=sample_query
+    )
+    ref_alt_arr = snps["variant_allele"].compute().values.astype(str)
+    freq_arr = (
+        allel.GenotypeArray(snps["call_genotype"]).count_alleles().to_frequencies()
+    )
+    pos = snps["variant_position"].compute().values
+    df = pd.DataFrame(
+        {
+            "position": pos,
+            "base": ref_alt_arr[:, 0],
+            "alt_frequency": freq_arr[:, 1:].sum(axis=1),
+        }
+    )  # Make dataframe for plotting
+    df["base_pos"] = df["base"] + "_" + df["position"].astype(str)
+    # Get the frequency of each base and store as data frame
+    freq_df = _get_base_freqs(_addZeroCols(freq_arr), ref_alt_arr).filter(like="freq")
+
+    data = pd.concat([df, freq_df], axis=1)
+
+    fig = _plotly_frequencies(
+        data=data,
+        region=region,
+        sample_sets=sample_sets,
+        sample_query=sample_query,
+        width=width,
+        height=height,
+    )
+    return fig
+
+
+def _plotly_frequencies(
+    data, region, sample_sets, sample_query=None, width=700, height=400, save=False
+):
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
+
+    hover_template = "<br>".join(
+        [
+            "Base / Position: %{customdata[4]}",
+            "Total Alternate freq: %{y}",
+            "A_freq: %{customdata[0]}",
+            "C_freq: %{customdata[1]}",
+            "G_freq: %{customdata[2]}",
+            "T_freq: %{customdata[3]}",
+        ]
+    )
+    # Color scatterpoints blue if segregating SNP
+    color = [-1 if v == 0 else 1 if v > 0 else 0 for v in data["alt_frequency"]]
+    colorscale = [[0, "lightgray"], [0.5, "lightgray"], [1, "dodgerblue"]]
+
+    fig = go.Figure(
+        go.Scatter(
+            x=data["position"],
+            y=data["alt_frequency"],
+            customdata=data[["A_freq", "C_freq", "G_freq", "T_freq", "base_pos"]],
+            hovertemplate=hover_template,
+            mode="markers",
+            marker=dict(
+                size=14,
+                color=color,
+                colorscale=colorscale,
+                line=dict(width=2, color="black"),
+            ),
+            marker_symbol="circle",
+        )
+    )
+    # Set xticks to be the REF allele
+    fig.update_xaxes(
+        tickmode="array",
+        tickangle=0,
+        tickvals=data["position"].to_list(),
+        ticktext=data["base"].to_list(),
+    )
+    fig.update_yaxes(
+        tickmode="array",
+        tickvals=np.arange(0, 1, 0.2),
+        range=[0, 1],
+        title="Alternate allele frequency",
+    )
+    # Set plot title
+    if sample_query is not None:
+        title_text = f"{region} | {sample_sets} | {sample_query} | allele frequencies"
+    else:
+        title_text = f"{region} | {sample_sets} | allele frequencies"
+
+    fig.update_layout(
+        height=height,
+        width=width,
+        title_text=title_text,
+        title_x=0.5,
+        template="simple_white",
+        showlegend=False,
+    )
+    fig.show()
+    return fig
