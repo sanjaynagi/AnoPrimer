@@ -1,10 +1,10 @@
 {
     "species" : "funestus",
-    "assay_type":"gDNA primers + probe",
-    "assay_name":"kdr_gDNA",
+    "assay_type":"gDNA primers",
+    "assay_name":"x_gDNA",
     "min_amplicon_size": 60,
-    "max_amplicon_size": 100,
+    "max_amplicon_size": 300,
     "n_primer_pairs":4,
-    "primer_target": "2RL:2422652",
+    "primer_target": "X:9422652",
     "sample_sets": "1236-VO-TZ-OKUMU-VMF00090"
 }
