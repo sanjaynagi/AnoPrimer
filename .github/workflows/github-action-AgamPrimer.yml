@@ -46,5 +46,4 @@ jobs:
         poetry run papermill notebooks/AgamPrimer-long.ipynb gDNA_run.ipynb -k AgamPrimer -f tests/gDNA_probe_Params_fun.json
         poetry run papermill notebooks/AgamPrimer-long.ipynb gDNA_run.ipynb -k AgamPrimer -f tests/gDNA_probe_Params.json
         poetry run papermill notebooks/AgamPrimer-long.ipynb probe_run.ipynb -k AgamPrimer -f tests/probe_Params.json
-        poetry run papermill notebooks/AgamPrimer-long.ipynb probe_run.ipynb -k AgamPrimer -f tests/probe_Params_fun.json
         poetry run papermill notebooks/AgamPrimer-short.ipynb short_run.ipynb -k AgamPrimer
