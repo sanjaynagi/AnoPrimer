@@ -1,0 +1,10 @@
+{
+    "species" : "funestus",
+    "assay_type":"cDNA primers",
+    "assay_name":"cyp6p9a",
+    "min_amplicon_size": 60,
+    "max_amplicon_size": 120,
+    "n_primer_pairs":6,
+    "primer_target": "LOC125764713_t1",
+    "sample_sets": "1236-VO-TZ-OKUMU-VMF00090"
+}
