@@ -1021,6 +1021,10 @@ def _plotly_primers(
             span = f"{int(res_dict[i][oligo]['position'].min())}-{int(res_dict[i][oligo]['position'].max())}"
             # Write text to plot for Tm, GC, span, and 3/5'
 
+            for col in res_dict[i][oligo].columns:
+                if col.endswith("freq"):
+                    res_dict[i][oligo][col] = np.round(res_dict[i][oligo][col], 2)
+
             fig.add_trace(
                 go.Scatter(
                     x=res_dict[i][oligo]["base_pos"],
