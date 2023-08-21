@@ -7,5 +7,5 @@
     "n_primer_pairs":6,
     "primer_target": "AGAP006228-RA",
     "sample_sets": "AG1000G-GH",
-    "sample_query":"taxon == 'coluzzii"
+    "sample_query":"taxon == 'coluzzii'"
 }
