@@ -1,4 +1,4 @@
-name: Execute notebooks
+name: notebooks-funestus
 
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-          python-version: ['3.8', '3.10', '3.11']
+          python-version: ['3.10']
 
     steps:
 
@@ -40,11 +40,5 @@ jobs:
     - name: Run notebooks
       run: |
         poetry run papermill notebooks/AgamPrimer-long.ipynb qPCR_run.ipynb -k AgamPrimer -f tests/cDNA_Params_fun.json
-        poetry run papermill notebooks/AgamPrimer-long.ipynb qPCR_run.ipynb -k AgamPrimer -f tests/cDNA_Params.json
         poetry run papermill notebooks/AgamPrimer-long.ipynb qPCR2_run.ipynb -k AgamPrimer -f tests/cDNA_Params_2_fun.json
-        poetry run papermill notebooks/AgamPrimer-long.ipynb qPCR2_run.ipynb -k AgamPrimer -f tests/cDNA_Params_2.json
         poetry run papermill notebooks/AgamPrimer-long.ipynb gDNA_run.ipynb -k AgamPrimer -f tests/gDNA_probe_Params_fun.json
-        poetry run papermill notebooks/AgamPrimer-long.ipynb gDNA_run.ipynb -k AgamPrimer -f tests/gDNA_probe_Params.json
-        poetry run papermill notebooks/AgamPrimer-long.ipynb probe_run.ipynb -k AgamPrimer -f tests/probe_Params.json
-        poetry run papermill notebooks/AgamPrimer-long.ipynb probe_run.ipynb -k AgamPrimer -f tests/probe_Params_fun.json
-        poetry run papermill notebooks/AgamPrimer-short.ipynb short_run.ipynb -k AgamPrimer

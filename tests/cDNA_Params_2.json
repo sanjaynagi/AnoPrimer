@@ -7,5 +7,6 @@
     "n_primer_pairs":6,
     "primer_target": "AGAP028081-RA",
     "cDNA_exon_junction" : false,
-    "sample_sets": "AG1000G-GH"
+    "sample_sets": "AG1000G-GH",
+    "sample_query":"taxon == 'coluzzii'"
 }
