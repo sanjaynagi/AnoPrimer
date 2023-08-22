@@ -1,17 +1,23 @@
 # AgamPrimer API
 
-This notebook provides an overview of the API for the AgamPrimer python package, to design primers in *Anopheles* mosquitoes whilst considering genomic variation. 
+This notebook provides an overview of the API for the AgamPrimer python package, to design primers in *Anopheles* mosquitoes whilst considering genomic variation.
 
 ## designPrimers()
 
 ```{eval-rst}
-.. autofunction:: AgamPrimer::AgamPrimer.designPrimers 
+.. autofunction:: AgamPrimer::AgamPrimer.designPrimers
 ```
 
-## plot_primer_ag3_frequencies()
+## check_my_oligo()
 
 ```{eval-rst}
-.. autofunction:: AgamPrimer::AgamPrimer.plot_primer_ag3_frequencies
+.. autofunction:: AgamPrimer::AgamPrimer.check_my_oligo
+```
+
+## plot_primer_snp_frequencies()
+
+```{eval-rst}
+.. autofunction:: AgamPrimer::AgamPrimer.plot_primer_snp_frequencies
 ```
 
 ## plot_primer_locs()
@@ -43,4 +49,3 @@ This notebook provides an overview of the API for the AgamPrimer python package,
 ```{eval-rst}
 .. autofunction:: AgamPrimer::AgamPrimer.primer3_run_statistics
 ```
-
