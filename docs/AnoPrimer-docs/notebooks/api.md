@@ -8,10 +8,10 @@ This notebook provides an overview of the API for the AnoPrimer python package, 
 .. autofunction:: AnoPrimer::AnoPrimer.designPrimers
 ```
 
-## plot_primer_ag3_frequencies()
+## plot_primer_snp_frequencies()
 
 ```{eval-rst}
-.. autofunction:: AnoPrimer::AnoPrimer.plot_primer_ag3_frequencies
+.. autofunction:: AnoPrimer::AnoPrimer.plot_primer_snp_frequencies
 ```
 
 ## plot_primer_locs()
