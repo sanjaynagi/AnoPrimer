@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>AgamPrimer API</title>
+    <title>AnoPrimer API</title>
   
   
   
@@ -72,7 +72,7 @@ var addUtterances = () => {
     script.src = "https://utteranc.es/client.js";
     script.async = "async";
 
-    script.setAttribute("repo", "sanjaynagi/AgamPrimer");
+    script.setAttribute("repo", "sanjaynagi/AnoPrimer");
     script.setAttribute("issue-term", "pathname");
     script.setAttribute("theme", "github-light");
     script.setAttribute("label", "comment");
@@ -98,7 +98,7 @@ const thebe_selector_output = ".output, .cell_output"
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Notebooks" href="notebooks.html" />
-    <link rel="prev" title="AgamPrimer" href="../landing-page.html" />
+    <link rel="prev" title="AnoPrimer" href="../landing-page.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="None"/>
   </head>
@@ -185,13 +185,13 @@ const thebe_selector_output = ".output, .cell_output"
         <ul class="nav bd-sidenav bd-sidenav__home-link">
             <li class="toctree-l1">
                 <a class="reference internal" href="../landing-page.html">
-                    AgamPrimer
+                    AnoPrimer
                 </a>
             </li>
         </ul>
         <p aria-level="2" class="caption" role="heading"><span class="caption-text">Usage</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">AgamPrimer API</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">AnoPrimer API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="notebooks.html">Notebooks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting_contributing.html">Troubleshooting</a></li>
 
@@ -249,7 +249,7 @@ const thebe_selector_output = ".output, .cell_output"
       
       
       
-      <li><a href="https://github.com/sanjaynagi.github.io/AgamPrimer" target="_blank"
+      <li><a href="https://github.com/sanjaynagi.github.io/AnoPrimer" target="_blank"
    class="btn btn-sm btn-source-repository-button dropdown-item"
    title="Source repository"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -266,7 +266,7 @@ const thebe_selector_output = ".output, .cell_output"
       
       
       
-      <li><a href="https://github.com/sanjaynagi.github.io/AgamPrimer/issues/new?title=Issue%20on%20page%20%2Fnotebooks/api.html&body=Your%20issue%20content%20here." target="_blank"
+      <li><a href="https://github.com/sanjaynagi.github.io/AnoPrimer/issues/new?title=Issue%20on%20page%20%2Fnotebooks/api.html&body=Your%20issue%20content%20here." target="_blank"
    class="btn btn-sm btn-source-issues-button dropdown-item"
    title="Open an issue"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -378,7 +378,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>AgamPrimer API</h1>
+    <h1>AnoPrimer API</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -389,7 +389,6 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#designprimers">designPrimers()</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#check-my-oligo">check_my_oligo()</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-primer-snp-frequencies">plot_primer_snp_frequencies()</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-primer-locs">plot_primer_locs()</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gget-blat-genome">gget_blat_genome()</a></li>
@@ -407,15 +406,15 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="agamprimer-api">
-<h1>AgamPrimer API<a class="headerlink" href="#agamprimer-api" title="Permalink to this headline">#</a></h1>
-<p>This notebook provides an overview of the API for the AgamPrimer python package, to design primers in <em>Anopheles</em> mosquitoes whilst considering genomic variation.</p>
+  <section class="tex2jax_ignore mathjax_ignore" id="anoprimer-api">
+<h1>AnoPrimer API<a class="headerlink" href="#anoprimer-api" title="Permalink to this headline">#</a></h1>
+<p>This notebook provides an overview of the API for the AnoPrimer python package, to design primers in <em>Anopheles</em> mosquitoes whilst considering genomic variation.</p>
 <section id="designprimers">
 <h2>designPrimers()<a class="headerlink" href="#designprimers" title="Permalink to this headline">#</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="AgamPrimer.AgamPrimer.designPrimers">
-<span class="sig-prename descclassname"><span class="pre">AgamPrimer.</span></span><span class="sig-name descname"><span class="pre">designPrimers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_amplicon_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_amplicon_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_primer_pairs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primer_parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_sets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_query</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cDNA_exon_junction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AgamPrimer.AgamPrimer.designPrimers" title="Permalink to this definition">#</a></dt>
-<dd><p>Run whole AgamPrimer workflow to design primers/probes with in one function</p>
+<dt class="sig sig-object py" id="AnoPrimer.AnoPrimer.designPrimers">
+<span class="sig-prename descclassname"><span class="pre">AnoPrimer.</span></span><span class="sig-name descname"><span class="pre">designPrimers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_amplicon_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_amplicon_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_primer_pairs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primer_parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_sets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_query</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cDNA_exon_junction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AnoPrimer.AnoPrimer.designPrimers" title="Permalink to this definition">#</a></dt>
+<dd><p>Run whole AnoPrimer workflow to design primers/probes with in one function</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -456,35 +455,11 @@ that this is set to True. In the case of gDNA primers, this parameter is ignored
 </dd></dl>
 
 </section>
-<section id="check-my-oligo">
-<h2>check_my_oligo()<a class="headerlink" href="#check-my-oligo" title="Permalink to this headline">#</a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="AgamPrimer.AgamPrimer.check_my_oligo">
-<span class="sig-prename descclassname"><span class="pre">AgamPrimer.</span></span><span class="sig-name descname"><span class="pre">check_my_oligo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_sets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'3.0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_query</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">700</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">400</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AgamPrimer.AgamPrimer.check_my_oligo" title="Permalink to this definition">#</a></dt>
-<dd><p>Align a sequence to AgamP3, retrieve snp frequencies in this region and plot.
-Only works with An.gambiae_sl for now.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>sequence</strong> (<em>str</em>) – The DNA sequence to align to the genome.</p></li>
-<li><p><strong>sample_sets</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Can be a sample set identifier (e.g., “AG1000G-AO”) or a list of
-sample set identifiers (e.g., [“AG1000G-BF-A”, “AG1000G-BF-B”]) or a
-release identifier (e.g., “3.0”) or a list of release identifiers.</p></li>
-<li><p><strong>sample_query</strong> (<em>str</em><em>, </em><em>optional</em>) – A pandas query string which will be evaluated against the sample
-metadata e.g., “taxon == ‘coluzzii’ and country == ‘Burkina Faso’”.</p></li>
-<li><p><strong>width</strong> (<em>int</em><em>, </em><em>optional</em>) – The width of the plot in pixels.</p></li>
-<li><p><strong>height</strong> (<em>int</em><em>, </em><em>optional</em>) – The height of the plot in pixels.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</section>
 <section id="plot-primer-snp-frequencies">
 <h2>plot_primer_snp_frequencies()<a class="headerlink" href="#plot-primer-snp-frequencies" title="Permalink to this headline">#</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="AgamPrimer.AgamPrimer.plot_primer_snp_frequencies">
-<span class="sig-prename descclassname"><span class="pre">AgamPrimer.</span></span><span class="sig-name descname"><span class="pre">plot_primer_snp_frequencies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primer_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gdna_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_sets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq_parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_query</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AgamPrimer.AgamPrimer.plot_primer_snp_frequencies" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="AnoPrimer.AnoPrimer.plot_primer_snp_frequencies">
+<span class="sig-prename descclassname"><span class="pre">AnoPrimer.</span></span><span class="sig-name descname"><span class="pre">plot_primer_snp_frequencies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primer_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gdna_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_sets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq_parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_query</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AnoPrimer.AnoPrimer.plot_primer_snp_frequencies" title="Permalink to this definition">#</a></dt>
 <dd><p>Loop through n primer pairs, retrieving frequency data and plot allele frequencies</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -512,8 +487,8 @@ the genotypes to a specific set of samples.</p></li>
 <section id="plot-primer-locs">
 <h2>plot_primer_locs()<a class="headerlink" href="#plot-primer-locs" title="Permalink to this headline">#</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="AgamPrimer.AgamPrimer.plot_primer_locs">
-<span class="sig-prename descclassname"><span class="pre">AgamPrimer.</span></span><span class="sig-name descname"><span class="pre">plot_primer_locs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primer_res_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primer_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq_parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_loc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'best'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AgamPrimer.AgamPrimer.plot_primer_locs" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="AnoPrimer.AnoPrimer.plot_primer_locs">
+<span class="sig-prename descclassname"><span class="pre">AnoPrimer.</span></span><span class="sig-name descname"><span class="pre">plot_primer_locs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primer_res_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primer_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq_parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_loc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'best'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AnoPrimer.AnoPrimer.plot_primer_locs" title="Permalink to this definition">#</a></dt>
 <dd><p>Plot the position of the primer sets in relation to any nearby exons</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -536,8 +511,8 @@ or ‘probe’</p></li>
 <section id="gget-blat-genome">
 <h2>gget_blat_genome()<a class="headerlink" href="#gget-blat-genome" title="Permalink to this headline">#</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="AgamPrimer.AgamPrimer.gget_blat_genome">
-<span class="sig-prename descclassname"><span class="pre">AgamPrimer.</span></span><span class="sig-name descname"><span class="pre">gget_blat_genome</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primer_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'anoGam3'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AgamPrimer.AgamPrimer.gget_blat_genome" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="AnoPrimer.AnoPrimer.gget_blat_genome">
+<span class="sig-prename descclassname"><span class="pre">AnoPrimer.</span></span><span class="sig-name descname"><span class="pre">gget_blat_genome</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primer_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'anoGam3'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AnoPrimer.AnoPrimer.gget_blat_genome" title="Permalink to this definition">#</a></dt>
 <dd><p>Aligns primers to the AgamP3 genome with BLAT.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -555,8 +530,8 @@ or ‘probe’</p></li>
 <section id="primer-params">
 <h2>primer_params()<a class="headerlink" href="#primer-params" title="Permalink to this headline">#</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="AgamPrimer.AgamPrimer.primer_params">
-<span class="sig-prename descclassname"><span class="pre">AgamPrimer.</span></span><span class="sig-name descname"><span class="pre">primer_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primer_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_primer_pairs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplicon_size_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generate_defaults</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AgamPrimer.AgamPrimer.primer_params" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="AnoPrimer.AnoPrimer.primer_params">
+<span class="sig-prename descclassname"><span class="pre">AnoPrimer.</span></span><span class="sig-name descname"><span class="pre">primer_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primer_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_primer_pairs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplicon_size_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generate_defaults</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AnoPrimer.AnoPrimer.primer_params" title="Permalink to this definition">#</a></dt>
 <dd><p>adds necessary parameters depending on assay_type, or can
 generate the default parameters</p>
 <dl class="field-list simple">
@@ -578,8 +553,8 @@ primer3 parameters will be generated.</p></li>
 <section id="primer3-to-pandas">
 <h2>primer3_to_pandas()<a class="headerlink" href="#primer3-to-pandas" title="Permalink to this headline">#</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="AgamPrimer.AgamPrimer.primer3_to_pandas">
-<span class="sig-prename descclassname"><span class="pre">AgamPrimer.</span></span><span class="sig-name descname"><span class="pre">primer3_to_pandas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primer_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AgamPrimer.AgamPrimer.primer3_to_pandas" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="AnoPrimer.AnoPrimer.primer3_to_pandas">
+<span class="sig-prename descclassname"><span class="pre">AnoPrimer.</span></span><span class="sig-name descname"><span class="pre">primer3_to_pandas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primer_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AnoPrimer.AnoPrimer.primer3_to_pandas" title="Permalink to this definition">#</a></dt>
 <dd><p>Convert primer3 results to pandas dataframe</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -602,8 +577,8 @@ or ‘probe’</p></li>
 <section id="primer3-run-statistics">
 <h2>primer3_run_statistics()<a class="headerlink" href="#primer3-run-statistics" title="Permalink to this headline">#</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="AgamPrimer.AgamPrimer.primer3_run_statistics">
-<span class="sig-prename descclassname"><span class="pre">AgamPrimer.</span></span><span class="sig-name descname"><span class="pre">primer3_run_statistics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primer_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AgamPrimer.AgamPrimer.primer3_run_statistics" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="AnoPrimer.AnoPrimer.primer3_run_statistics">
+<span class="sig-prename descclassname"><span class="pre">AnoPrimer.</span></span><span class="sig-name descname"><span class="pre">primer3_run_statistics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primer_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AnoPrimer.AnoPrimer.primer3_run_statistics" title="Permalink to this definition">#</a></dt>
 <dd><p>Prints out primer3 run statistics from the primer3 results dictionary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -656,7 +631,7 @@ or ‘probe’</p></li>
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">AgamPrimer</p>
+        <p class="prev-next-title">AnoPrimer</p>
       </div>
     </a>
     <a class="right-next"
@@ -687,7 +662,6 @@ or ‘probe’</p></li>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#designprimers">designPrimers()</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#check-my-oligo">check_my_oligo()</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-primer-snp-frequencies">plot_primer_snp_frequencies()</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-primer-locs">plot_primer_locs()</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gget-blat-genome">gget_blat_genome()</a></li>
