@@ -21,20 +21,3 @@ Documentation: https://sanjaynagi.github.io/AnoPrimer/
  [![Custom badge](https://img.shields.io/endpoint?color=red&logo=Google%20Colab&url=https%3A%2F%2Fraw.githubusercontent.com%2Fsanjaynagi%2FAnoPrimer%2Fmain%2Fgraphics%2Fbadge-short.json)](https://colab.research.google.com/github/sanjaynagi/AnoPrimer/blob/main/notebooks/AnoPrimer-short.ipynb)
 
 </div>
-
-#### Release notes
-
-- 0.6.2 - Adds genomic span to primer DataFrame output
-- 0.6.1 - Adds support for primer3-py 2.0.0 and pins this version to future-proof.
-- 0.6.0 - Adds support for python 3.10 and 3.11
-- 0.5.12 - for cDNA primers, designing over exon-exon junctions is now optional due to `cDNA_exon_junction` argument. Docstring added to `designPrimers()`.
-- 0.5.11 - feedback on troubleshooting now provided in `designPrimers()` function if primer design fails
-- 0.5.10 - region string provided instead of contig
-- 0.5.9 - 'cDNA primers' replaces 'qPCR primers' throughout.
-- 0.5.8 - Two notebooks, short and long, including all in one function. can now check the primers for specificity with gget blat implementation.
-- 0.4.0 - `plot_primer_ag3_frequencies()` now uses plotly to make an interactive plot, where one can hover over primer bases, which returns the exact frequency for each base.
-- 0.3.4 - Fix bug in `get_gDNA_sequence()` and in `plot_primer_locs()`
-- 0.3.3 - Introduced feature to enable a sample query (e.g subset to a specific species within a cohort)
-- 0.3.2 - minor fix to remove printing of variable in `plot_primer_ag3_frequencies()`
-- 0.3.1 - minor fix to bug introduced in 0.3.0 to `plot_primer()` function
-- 0.3.0 - Support for probe design added, functions restructured to accommodate this
