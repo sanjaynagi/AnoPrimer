@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "AnoPrimer"
-version = "0.6.9"
+version = "0.7.0"
 description = "A package to design primers in Anopheles gambiae whilst considering genetic variation with malariagen_data"
 authors = [
     "Sanjay Nagi <sanjay.nagi@lstmed.ac.uk>",
