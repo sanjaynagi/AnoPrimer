@@ -10,7 +10,7 @@
 
 </div>
 
-Primer design in *Anopheles gambiae s.l* taking into account SNP variation in primer binding sites, using primer3-py and malariagen_data. Supports genomic DNA primers, cDNA primers and hybridisation probes:
+Primer design in *Anopheles gambiae s.l* and *funestus* taking into account SNP variation in primer binding sites, using primer3-py and malariagen_data. Supports genomic DNA primers, cDNA primers and hybridisation probes:
 <br/><br/>
 <div align="center">
 
