@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "AgamPrimer"
+name = "AnoPrimer"
 version = "0.6.9"
 description = "A package to design primers in Anopheles gambiae whilst considering genetic variation with malariagen_data"
 authors = [
     "Sanjay Nagi <sanjay.nagi@lstmed.ac.uk>",
     ]
 packages = [
-    { include = "AgamPrimer" }
+    { include = "AnoPrimer" }
 ]
 license = "MIT"
 

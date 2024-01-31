@@ -698,7 +698,7 @@ def designPrimers(
     cDNA_exon_junction=True,
 ):
     """
-    Run whole AgamPrimer workflow to design primers/probes with in one function
+    Run whole AnoPrimer workflow to design primers/probes with in one function
 
     Parameters
     ----------
@@ -799,7 +799,7 @@ def designPrimers(
             print(primer3_run_statistics(primer_dict, assay_type))
             return (None, None)
 
-    # AgamPrimer.primer3_run_statistics(primer_dict, assay_type)
+    # AnoPrimer.primer3_run_statistics(primer_dict, assay_type)
     primer_df = primer3_to_pandas(primer_dict=primer_dict, assay_type=assay_type)
 
     # plot frequencies of alleles in primer pairs

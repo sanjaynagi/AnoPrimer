@@ -35,12 +35,12 @@ jobs:
     - name: Install dependencies
       run: |
         poetry install
-        poetry run python -m ipykernel install --user --name AgamPrimer
+        poetry run python -m ipykernel install --user --name AnoPrimer
 
     - name: Run notebooks
       run: |
-        poetry run papermill notebooks/AgamPrimer-long.ipynb qPCR_run.ipynb -k AgamPrimer -f tests/cDNA_Params.json
-        poetry run papermill notebooks/AgamPrimer-long.ipynb qPCR2_run.ipynb -k AgamPrimer -f tests/cDNA_Params_2.json
-        poetry run papermill notebooks/AgamPrimer-long.ipynb gDNA_run.ipynb -k AgamPrimer -f tests/gDNA_probe_Params.json
-        poetry run papermill notebooks/AgamPrimer-long.ipynb probe_run.ipynb -k AgamPrimer -f tests/probe_Params.json
-        poetry run papermill notebooks/AgamPrimer-short.ipynb short_run.ipynb -k AgamPrimer
+        poetry run papermill notebooks/AnoPrimer-long.ipynb qPCR_run.ipynb -k AnoPrimer -f tests/cDNA_Params.json
+        poetry run papermill notebooks/AnoPrimer-long.ipynb qPCR2_run.ipynb -k AnoPrimer -f tests/cDNA_Params_2.json
+        poetry run papermill notebooks/AnoPrimer-long.ipynb gDNA_run.ipynb -k AnoPrimer -f tests/gDNA_probe_Params.json
+        poetry run papermill notebooks/AnoPrimer-long.ipynb probe_run.ipynb -k AnoPrimer -f tests/probe_Params.json
+        poetry run papermill notebooks/AnoPrimer-short.ipynb short_run.ipynb -k AnoPrimer
