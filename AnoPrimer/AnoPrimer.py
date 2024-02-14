@@ -673,7 +673,9 @@ def check_and_split_target(species, target, assay_type):
                 "3L",
                 "3R",
                 "X",
-            ], "target contig not recognised, should be 2L, 2R, 3L, 3R or X"
+                "2RL",
+                "3RL",
+            ], "target contig not recognised, should be 2L, 2R, 3L, 3R, 2RL, 3RL, X"
         elif species == "funestus":
             assert contig in [
                 "2RL",
