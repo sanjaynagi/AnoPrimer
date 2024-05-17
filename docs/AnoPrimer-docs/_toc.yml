@@ -5,4 +5,5 @@ parts:
   chapters:
     - file: notebooks/api
     - file: notebooks/notebooks
+    - file: notebooks/data_access
     - file: notebooks/troubleshooting_contributing

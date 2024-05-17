@@ -10,9 +10,6 @@ import seaborn as sns
 from matplotlib import patches
 from plotly.subplots import make_subplots
 
-ag3 = malariagen_data.Ag3(url="gs://vo_agam_release/", pre=True)
-af1 = malariagen_data.Af1(url="gs://vo_afun_release/", pre=True)
-
 
 def retrieve_data_resource(species):
     assert species in [
@@ -20,9 +17,9 @@ def retrieve_data_resource(species):
         "funestus",
     ], f"species {species} not recognised, please use 'gambiae_sl' or 'funestus'"
     if species == "gambiae_sl":
-        data_resource = ag3
+        data_resource = malariagen_data.Ag3(url="gs://vo_agam_release/", pre=True)
     elif species == "funestus":
-        data_resource = af1
+        data_resource = malariagen_data.Af1(url="gs://vo_afun_release/", pre=True)
     return data_resource
 
 
@@ -605,7 +602,9 @@ def plot_primer_locs(
     # plot the legend
     plt.legend(handles=handles, loc=legend_loc)
     if out_dir:
-        fig.savefig(f"{out_dir}/{assay_name}_primer_locs.png", dpi=300)
+        fig.savefig(
+            f"{out_dir}/{assay_name}_primer_locs.png", dpi=300, bbox_inches="tight"
+        )
 
 
 def gget_blat_genome(primer_df, assay_type, assembly="anoGam3"):
@@ -1256,21 +1255,24 @@ def check_my_oligo(
     contig = contig.replace("chr", "")
     region_span = f"{contig}:{start}-{end}"
     print("plotting frequencies in ag3 data")
+
     fig = plot_sequence_frequencies(
+        data_resource=malariagen_data.Ag3(url="gs://vo_agam_release/", pre=True),
         region=region_span,
         sample_sets=sample_sets,
         sample_query=sample_query,
         width=width,
         height=height,
     )
+    return fig
 
 
 def plot_sequence_frequencies(
-    region, sample_sets=None, sample_query=None, width=700, height=400
+    data_resource, region, sample_sets=None, sample_query=None, width=700, height=400
 ):
     """Retrieve frequencies"""
 
-    snps = ag3.snp_calls(
+    snps = data_resource.snp_calls(
         region=region, sample_sets=sample_sets, sample_query=sample_query
     )
     ref_alt_arr = snps["variant_allele"].compute().values.astype(str)
