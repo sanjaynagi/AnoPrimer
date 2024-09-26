@@ -20,7 +20,7 @@ malariagen_data = ">=13.2.1"
 openpyxl = "*"
 gget = "*"
 seaborn = "*"
-kaleido = ">=0.2.1"
+kaleido = "*"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "*"
