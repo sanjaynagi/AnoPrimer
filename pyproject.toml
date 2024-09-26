@@ -14,13 +14,13 @@ packages = [
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.12"
+python = ">=3.9,<3.12"
 primer3-py = "2.0.0"
-malariagen_data = "*"
+malariagen_data = ">=11"
 openpyxl = "*"
 gget = "*"
 seaborn = "*"
-kaleido = "0.2.1"
+kaleido = ">=0.2.1"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "*"
