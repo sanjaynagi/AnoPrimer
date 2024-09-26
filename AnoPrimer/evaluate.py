@@ -77,7 +77,7 @@ class AnoPrimerResults:
 
         # Extract additional attributes from seq_parameters
         self.target_sequence = seq_parameters.get("SEQUENCE_TEMPLATE")
-        self.gdna_pos = seq_parameters.get("GENOMIC_DNA_POSITIONS")
+        self.gdna_pos = np.array(seq_parameters.get("GENOMIC_DNA_POSITIONS"))
 
     def evaluate_primers(
         self,

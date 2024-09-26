@@ -175,7 +175,7 @@ def prepare_gDNA_sequence(
         "SEQUENCE_TEMPLATE": target_sequence,
         "SEQUENCE_TARGET": target_loc_primer3,
         "GENOMIC_TARGET": target,
-        "GENOMIC_DNA_POSITIONS": gdna_pos,
+        "GENOMIC_DNA_POSITIONS": list(gdna_pos),
     }
 
     if "probe" in assay_type:
@@ -235,7 +235,7 @@ def prepare_cDNA_sequence(
         "SEQUENCE_ID": assay_name,
         "SEQUENCE_TEMPLATE": target_mRNA_seq,
         "GENOMIC_TARGET": transcript,
-        "GENOMIC_DNA_POSITIONS": gdna_pos,
+        "GENOMIC_DNA_POSITIONS": list(gdna_pos),
     }
 
     if cDNA_exon_junction:
