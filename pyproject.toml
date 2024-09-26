@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "AnoPrimer"
-version = "1.0.2"
+version = "2.0.0"
 description = "A package to design primers in Anopheles gambiae whilst considering genetic variation with malariagen_data"
 readme = "README.md"
 documentation = "https://sanjaynagi.github.io/anoprimer/latest/"
@@ -14,13 +14,13 @@ packages = [
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.12"
+python = ">=3.10,<3.12"
 primer3-py = "2.0.0"
-malariagen_data = "*"
+malariagen_data = ">=10.0.0"
 openpyxl = "*"
 gget = "*"
 seaborn = "*"
-kaleido = "0.2.1"
+kaleido = "*"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "*"

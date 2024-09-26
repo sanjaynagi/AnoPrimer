@@ -1,3 +1,4 @@
 # flake8: noqa
-from . import AnoPrimer
-from .AnoPrimer import *
+from .design import *
+from .evaluate import AnoPrimerResults
+from .utils import *
