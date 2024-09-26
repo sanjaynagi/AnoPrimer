@@ -16,7 +16,7 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = ">=3.9,<3.12"
 primer3-py = "2.0.0"
-malariagen_data = ">=11"
+malariagen_data = ">=12.0.0"
 openpyxl = "*"
 gget = "*"
 seaborn = "*"
