@@ -14,9 +14,9 @@ packages = [
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.12"
+python = ">=3.10,<3.12"
 primer3-py = "2.0.0"
-malariagen_data = ">=12.0.0"
+malariagen_data = ">=13.2.1"
 openpyxl = "*"
 gget = "*"
 seaborn = "*"
