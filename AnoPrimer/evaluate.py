@@ -12,7 +12,9 @@ from .utils import (
     _plotly_primers,
     _retrieve_span,
     _return_oligo_list,
+    add_spans_to_df,
     retrieve_data_resource,
+    round_floats_in_df,
 )
 
 
@@ -71,7 +73,7 @@ class AnoPrimerResults:
         self.assay_type = assay_type
         self.assay_name = assay_name
 
-        self.df = primer_df
+        self.df = round_floats_in_df(add_spans_to_df(primer_df), decimal_places=2)
         self.seq_parameters = seq_parameters
         self.primer_parameters = primer_parameters
 
@@ -350,11 +352,20 @@ class AnoPrimerResults:
 
     def _plot_primers(self, ax, oligos):
         """Helper method to plot primers."""
+
+        def _generate_primer_pair_positions(num_pairs, start=1, end=1.45):
+            if num_pairs == 1:
+                return [start]
+
+            step = (end - start) / (num_pairs - 1)
+            return [start + i * step for i in range(num_pairs)]
+
         pal = sns.color_palette("Set2", len(self.df.columns))
         handles, labels = ax.get_legend_handles_labels()
         for pair in self.df:
             pair = int(pair)
             pair_idx = pair - 1  # python based indexing
+            pair_ypos = _generate_primer_pair_positions(len(self.df.columns))
             for oligo in oligos:
                 oligo_pos = _retrieve_span(
                     primer_df=self.df,
@@ -368,7 +379,7 @@ class AnoPrimerResults:
                 if oligo == "forward":
                     plt.arrow(
                         lower,
-                        0.8 + (2 / (10 - (pair_idx))),
+                        pair_ypos[pair_idx],
                         upper - lower,
                         0,
                         width=0.03,
@@ -378,7 +389,7 @@ class AnoPrimerResults:
                 elif oligo == "reverse":
                     plt.arrow(
                         upper,
-                        0.8 + (2 / (10 - (pair_idx))),
+                        pair_ypos[pair_idx],
                         lower - upper,
                         0,
                         width=0.03,
@@ -386,10 +397,11 @@ class AnoPrimerResults:
                         color=pal[pair_idx],
                     )
                 elif oligo == "probe":
-                    ax.axhline(y=0.8 + (2 / (10 - (pair_idx))), xmin=lower, xmax=upper)
+                    ax.axhline(y=pair_ypos[pair_idx], xmin=lower, xmax=upper)
                     line = plt.Line2D(
                         (lower, upper),
-                        (0.8 + (2 / (10 - (pair))), 0.8 + (2 / (10 - (pair)))),
+                        pair_ypos[pair_idx],
+                        pair_ypos[pair_idx],
                         lw=2.5,
                         color=pal[pair_idx],
                     )

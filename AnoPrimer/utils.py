@@ -153,6 +153,47 @@ def _plotly_frequencies(
 
 
 #### utility functions ####
+def add_spans_to_df(primers):
+    df = primers.df
+    oligos, _ = _return_oligo_list(assay_type=primers.assay_type)
+
+    oligo_spans = {}
+    for oligo in oligos:
+        spans = []
+        for pair in df:
+            pos = _retrieve_span(
+                df,
+                gdna_pos=primers.gdna_pos,
+                oligo=oligo,
+                assay_type=primers.assay_type,
+                pair=pair,
+            )
+            span = f"{primers.contig}:{pos.min()}-{pos.max()}"
+            spans.append(span)
+
+        oligo_spans[oligo] = pd.Series(
+            spans, name=f"primer_{oligo}_span", index=primers.df.columns
+        )
+        df = pd.concat([df, oligo_spans[oligo].to_frame().T])
+
+    return df
+
+
+def round_floats_in_df(df, decimal_places=1):
+    import numpy as np
+
+    def round_if_float(val):
+        if isinstance(val, (int, np.integer)):
+            return val
+        try:
+            float_val = float(val)
+            if float_val.is_integer():
+                return int(float_val)
+            return round(float_val, decimal_places)
+        except (ValueError, TypeError):
+            return val
+
+    return df.map(round_if_float)
 
 
 def extract_trailing_digits(string):
