@@ -155,6 +155,23 @@ def _plotly_frequencies(
 #### utility functions ####
 
 
+def round_floats_in_df(df, decimal_places=1):
+    import numpy as np
+
+    def round_if_float(val):
+        if isinstance(val, (int, np.integer)):
+            return val
+        try:
+            float_val = float(val)
+            if float_val.is_integer():
+                return int(float_val)
+            return round(float_val, decimal_places)
+        except (ValueError, TypeError):
+            return val
+
+    return df.applymap(round_if_float)
+
+
 def extract_trailing_digits(string):
     import re
 
