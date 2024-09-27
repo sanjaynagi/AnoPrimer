@@ -395,7 +395,7 @@ class AnoPrimerResults:
                     )
                     ax.add_line(line)
 
-            patch = patches.Patch(color=pal[pair], label=f"pair {pair}")
+            patch = patches.Patch(color=pal[pair_idx], label=f"pair {pair}")
             handles.append(patch)
 
         return handles
