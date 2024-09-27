@@ -327,30 +327,29 @@ def _plotly_primers(
     fig.update_annotations(font_size=13)
     for idx, oligo in enumerate(oligos):
         idx = idx + 1
-        for i in primer_df:
-            i = int(i)
-            row_i = i + 1
+        for pair in primer_df:
+            row_i = int(pair)
 
             color = [
                 -1 if v == 0 else 1 if v > 0 else 0
-                for v in res_dict[i][oligo]["alt_frequency"]
+                for v in res_dict[pair][oligo]["alt_frequency"]
             ]
             colorscale = [[0, "lightgray"], [0.5, "lightgray"], [1, "dodgerblue"]]
 
-            tm = np.round(primer_df.loc[f"primer_{oligo}_tm", str(i)], 2)
-            gc = np.round(primer_df.loc[f"primer_{oligo}_gc_percent", str(i)], 2)
-            span = f"{int(res_dict[i][oligo]['position'].min())}-{int(res_dict[i][oligo]['position'].max())}"
             # Write text to plot for Tm, GC, span, and 3/5'
+            tm = np.round(primer_df.loc[f"primer_{oligo}_tm", pair], 2)
+            gc = np.round(primer_df.loc[f"primer_{oligo}_gc_percent", pair], 2)
+            span = f"{int(res_dict[pair][oligo]['position'].min())}-{int(res_dict[pair][oligo]['position'].max())}"
 
-            for col in res_dict[i][oligo].columns:
+            for col in res_dict[pair][oligo].columns:
                 if col.endswith("freq"):
-                    res_dict[i][oligo][col] = np.round(res_dict[i][oligo][col], 2)
+                    res_dict[pair][oligo][col] = np.round(res_dict[pair][oligo][col], 2)
 
             fig.add_trace(
                 go.Scatter(
-                    x=res_dict[i][oligo]["base_pos"],
-                    y=res_dict[i][oligo]["alt_frequency"],
-                    customdata=res_dict[i][oligo][
+                    x=res_dict[pair][oligo]["base_pos"],
+                    y=res_dict[pair][oligo]["alt_frequency"],
+                    customdata=res_dict[pair][oligo][
                         ["A_freq", "C_freq", "G_freq", "T_freq", "base_pos"]
                     ],
                     hovertemplate=hover_template,
@@ -369,7 +368,7 @@ def _plotly_primers(
             fig.add_annotation(
                 row=row_i,
                 col=idx,
-                x=res_dict[i][oligo]["base_pos"][0],
+                x=res_dict[pair][oligo]["base_pos"][0],
                 y=0.8,
                 text="5'",
                 showarrow=False,
@@ -377,7 +376,7 @@ def _plotly_primers(
             fig.add_annotation(
                 row=row_i,
                 col=idx,
-                x=res_dict[i][oligo]["base_pos"].to_numpy()[-1],
+                x=res_dict[pair][oligo]["base_pos"].to_numpy()[-1],
                 y=0.8,
                 text="3'",
                 showarrow=False,
@@ -385,7 +384,7 @@ def _plotly_primers(
             fig.add_annotation(
                 row=row_i,
                 col=idx,
-                x=res_dict[i][oligo]["base_pos"].to_numpy()[4],
+                x=res_dict[pair][oligo]["base_pos"].to_numpy()[4],
                 y=0.92,
                 text=span,
                 showarrow=False,
@@ -393,7 +392,7 @@ def _plotly_primers(
             fig.add_annotation(
                 row=row_i,
                 col=idx,
-                x=res_dict[i][oligo]["base_pos"].to_numpy()[-7],
+                x=res_dict[pair][oligo]["base_pos"].to_numpy()[-7],
                 y=0.92,
                 text=f"GC={gc}",
                 showarrow=False,
@@ -401,7 +400,7 @@ def _plotly_primers(
             fig.add_annotation(
                 row=row_i,
                 col=idx,
-                x=res_dict[i][oligo]["base_pos"].to_numpy()[-3],
+                x=res_dict[pair][oligo]["base_pos"].to_numpy()[-3],
                 y=0.92,
                 text=f"TM={tm}",
                 showarrow=False,
@@ -411,8 +410,8 @@ def _plotly_primers(
                 row=row_i,
                 col=idx,
                 tickmode="array",
-                tickvals=res_dict[i][oligo]["base_pos"],
-                ticktext=res_dict[i][oligo]["base"],
+                tickvals=res_dict[pair][oligo]["base_pos"],
+                ticktext=res_dict[pair][oligo]["base"],
                 tickangle=0,
                 mirror=True,
             )
@@ -446,7 +445,7 @@ def _plotly_primers(
 
     # fig.update_traces(customdata=customdata, hovertemplate=hovertemplate)
     fig.update_layout(
-        height=200 * len(primer_df.columns),
+        height=220 * len(primer_df.columns),
         width=500 * len(oligos),
         title_text=title_text,
         title_x=0.5,
