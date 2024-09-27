@@ -248,9 +248,10 @@ class AnoPrimerResults:
         # Plot exons, genes, primer spans
         self._plot_exons(ax, locgff, exon_id_col)
         self._plot_genes(ax, genegff, min_, max_)
-        self._plot_primers(ax, oligos)
+        handles = self._plot_primers(ax, oligos)
+
         # Add legend and save if out_dir is provided
-        plt.legend(handles=ax.get_legend_handles_labels()[0], loc=legend_loc)
+        plt.legend(handles=handles, loc=legend_loc)
         if out_dir:
             fig.savefig(
                 f"{out_dir}/{assay_name}_primer_locs.png", dpi=300, bbox_inches="tight"
@@ -396,6 +397,8 @@ class AnoPrimerResults:
 
             patch = patches.Patch(color=pal[pair], label=f"pair {pair}")
             handles.append(patch)
+
+        return handles
 
     def gget_blat_genome(self, assembly="anoGam3"):
         """
