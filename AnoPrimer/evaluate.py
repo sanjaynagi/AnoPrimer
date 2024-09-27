@@ -12,7 +12,6 @@ from .utils import (
     _plotly_primers,
     _retrieve_span,
     _return_oligo_list,
-    add_spans_to_df,
     retrieve_data_resource,
     round_floats_in_df,
 )
@@ -73,13 +72,15 @@ class AnoPrimerResults:
         self.assay_type = assay_type
         self.assay_name = assay_name
 
-        self.df = round_floats_in_df(add_spans_to_df(primer_df), decimal_places=2)
         self.seq_parameters = seq_parameters
         self.primer_parameters = primer_parameters
 
         # Extract additional attributes from seq_parameters
         self.target_sequence = seq_parameters.get("SEQUENCE_TEMPLATE")
         self.gdna_pos = np.array(seq_parameters.get("GENOMIC_DNA_POSITIONS"))
+
+        self.df = primer_df
+        self.df = round_floats_in_df(self.add_spans_to_df(), decimal_places=2)
 
     def evaluate_primers(
         self,
@@ -121,6 +122,31 @@ class AnoPrimerResults:
             blat_df = self.gget_blat_genome(assembly=assembly)
             if out_dir is not None and blat_df is not None:
                 blat_df.to_csv(f"{out_dir}/{self.assay_name}_blat_results.csv")
+
+    def add_spans_to_df(self):
+        df = self.df
+        oligos, _ = _return_oligo_list(assay_type=self.assay_type)
+
+        oligo_spans = {}
+        for oligo in oligos:
+            spans = []
+            for pair in df:
+                pos = _retrieve_span(
+                    df,
+                    gdna_pos=self.gdna_pos,
+                    oligo=oligo,
+                    assay_type=self.assay_type,
+                    pair=pair,
+                )
+                span = f"{self.contig}:{pos.min()}-{pos.max()}"
+                spans.append(span)
+
+            oligo_spans[oligo] = pd.Series(
+                spans, name=f"primer_{oligo}_span", index=self.df.columns
+            )
+            df = pd.concat([df, oligo_spans[oligo].to_frame().T])
+
+        return df
 
     def summarise_metadata(self, sample_sets=None, sample_query=None):
         """
