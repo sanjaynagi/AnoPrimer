@@ -178,12 +178,12 @@ class AnoPrimerResults:
 
         # Loop through each primer pair and get the frequencies of alternate alleles
         res_dict = {}
-        for i in range(len(self.df.columns)):
-            res_dict[i] = _get_primer_alt_frequencies(
+        for pair in self.df:
+            res_dict[pair] = _get_primer_alt_frequencies(
                 species=self.species,
                 primer_df=self.df,
                 gdna_pos=self.gdna_pos,
-                pair=i,
+                pair=pair,
                 assay_type=self.assay_type,
                 contig=self.contig,
                 sample_sets=sample_sets,
@@ -353,6 +353,7 @@ class AnoPrimerResults:
         handles, labels = ax.get_legend_handles_labels()
         for pair in self.df:
             pair = int(pair)
+            pair_idx = pair - 1  # python based indexing
             for oligo in oligos:
                 oligo_pos = _retrieve_span(
                     primer_df=self.df,
@@ -366,30 +367,30 @@ class AnoPrimerResults:
                 if oligo == "forward":
                     plt.arrow(
                         lower,
-                        0.8 + (2 / (10 - (pair))),
+                        0.8 + (2 / (10 - (pair_idx))),
                         upper - lower,
                         0,
                         width=0.03,
                         length_includes_head=True,
-                        color=pal[pair],
+                        color=pal[pair_idx],
                     )
                 elif oligo == "reverse":
                     plt.arrow(
                         upper,
-                        0.8 + (2 / (10 - (pair))),
+                        0.8 + (2 / (10 - (pair_idx))),
                         lower - upper,
                         0,
                         width=0.03,
                         length_includes_head=True,
-                        color=pal[pair],
+                        color=pal[pair_idx],
                     )
                 elif oligo == "probe":
-                    ax.axhline(y=0.8 + (2 / (10 - (pair))), xmin=lower, xmax=upper)
+                    ax.axhline(y=0.8 + (2 / (10 - (pair_idx))), xmin=lower, xmax=upper)
                     line = plt.Line2D(
                         (lower, upper),
                         (0.8 + (2 / (10 - (pair))), 0.8 + (2 / (10 - (pair)))),
                         lw=2.5,
-                        color=pal[pair],
+                        color=pal[pair_idx],
                     )
                     ax.add_line(line)
 
