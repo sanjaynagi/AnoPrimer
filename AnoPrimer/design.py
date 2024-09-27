@@ -422,7 +422,9 @@ def primer3_to_pandas(primer_dict, assay_type):
     # Create a column which is primer pair #, and a column for primer
     # parameter which does not contain primer pair #
     primer_df = primer_df.iloc[row_start:, :].copy()
-    primer_df["primer_pair"] = primer_df["parameter"].str.extract("([0-9][0-9]|[0-9])")
+    primer_df["primer_pair"] = (
+        primer_df["parameter"].str.extract("([0-9][0-9]|[0-9])").astype(int) + 1
+    )
     primer_df["parameter"] = primer_df["parameter"].str.replace(
         "(_[0-9][0-9]|_[0-9])", "", regex=True
     )
@@ -446,7 +448,8 @@ def primer3_to_pandas(primer_dict, assay_type):
     required_info = [string.lower() for string in required_info]
 
     # Subset data frame
-    primer_df = primer_df.loc[required_info, np.arange(primer_df.shape[1]).astype(str)]
+    primer_df = primer_df.loc[required_info, np.arange(1, primer_df.shape[1] + 1)]
+    primer_df.columns = primer_df.columns.astype(str)
     return primer_df
 
 
