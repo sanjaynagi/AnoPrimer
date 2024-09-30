@@ -276,7 +276,7 @@ class AnoPrimerResults:
         # Plot exons, genes, primer spans
         self._plot_exons(ax, locgff, exon_id_col)
         self._plot_genes(ax, genegff, min_, max_)
-        handles = self._plot_primers(ax, oligos)
+        handles = self._plot_primers(ax, oligos, locgff)
 
         # Add legend and save if out_dir is provided
         plt.legend(handles=handles, loc=legend_loc)
@@ -376,22 +376,27 @@ class AnoPrimerResults:
                 )
             ax.add_patch(rect)
 
-    def _plot_primers(self, ax, oligos):
+    def _plot_primers(self, ax, oligos, locgff):
         """Helper method to plot primers."""
 
         def _generate_primer_pair_positions(num_pairs, start=1, end=1.45):
             if num_pairs == 1:
                 return [start]
-
             step = (end - start) / (num_pairs - 1)
             return [start + i * step for i in range(num_pairs)]
 
+        def _is_exon_exon_junction(start, end, locgff):
+            """Check if the primer spans an exon-exon junction."""
+            exons = locgff[(locgff["start"] <= end) & (locgff["end"] >= start)]
+            return len(exons) > 1
+
         pal = sns.color_palette("Set2", len(self.df.columns))
         handles, labels = ax.get_legend_handles_labels()
+        pair_ypos = _generate_primer_pair_positions(len(self.df.columns))
+
         for pair in self.df:
             pair = int(pair)
             pair_idx = pair - 1  # python based indexing
-            pair_ypos = _generate_primer_pair_positions(len(self.df.columns))
             for oligo in oligos:
                 oligo_pos = _retrieve_span(
                     primer_df=self.df,
@@ -402,6 +407,10 @@ class AnoPrimerResults:
                 )
                 lower, upper = oligo_pos.min(), oligo_pos.max()
 
+                # dashed lines for exon junction spanning primers
+                exonexonjunction = _is_exon_exon_junction(lower, upper, locgff)
+                linestyle = "dotted" if exonexonjunction else "solid"
+
                 if oligo == "forward":
                     plt.arrow(
                         lower,
@@ -411,6 +420,7 @@ class AnoPrimerResults:
                         width=0.03,
                         length_includes_head=True,
                         color=pal[pair_idx],
+                        linestyle=linestyle,
                     )
                 elif oligo == "reverse":
                     plt.arrow(
@@ -421,14 +431,15 @@ class AnoPrimerResults:
                         width=0.03,
                         length_includes_head=True,
                         color=pal[pair_idx],
+                        linestyle=linestyle,
                     )
                 elif oligo == "probe":
                     ax.axhline(y=pair_ypos[pair_idx], xmin=lower, xmax=upper)
                     line = plt.Line2D(
-                        (lower, upper),
-                        pair_ypos[pair_idx],
-                        pair_ypos[pair_idx],
-                        lw=2.5,
+                        xdata=(lower, upper),
+                        ydata=(pair_ypos[pair_idx], pair_ypos[pair_idx]),
+                        linewidth=2,
+                        linestyle=(0, (1, 1)),
                         color=pal[pair_idx],
                     )
                     ax.add_line(line)
