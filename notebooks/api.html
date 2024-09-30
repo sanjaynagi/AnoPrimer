@@ -389,10 +389,13 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#designprimers">designPrimers()</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#design-primers">design_primers()</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluate-primers">evaluate_primers()</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-primer-snp-frequencies">plot_primer_snp_frequencies()</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-primer-locs">plot_primer_locs()</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gget-blat-genome">gget_blat_genome()</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#check-my-oligo">check_my_oligo()</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-sequence-frequencies">plot_sequence_frequencies()</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#primer-params">primer_params()</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#primer3-to-pandas">primer3_to_pandas()</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#primer3-run-statistics">primer3_run_statistics()</a></li>
@@ -410,12 +413,12 @@ document.write(`
   <section class="tex2jax_ignore mathjax_ignore" id="anoprimer-api">
 <h1>AnoPrimer API<a class="headerlink" href="#anoprimer-api" title="Permalink to this headline">#</a></h1>
 <p>This notebook provides an overview of the API for the AnoPrimer python package, to design primers in <em>Anopheles</em> mosquitoes whilst considering genomic variation.</p>
-<section id="designprimers">
-<h2>designPrimers()<a class="headerlink" href="#designprimers" title="Permalink to this headline">#</a></h2>
+<section id="design-primers">
+<h2>design_primers()<a class="headerlink" href="#design-primers" title="Permalink to this headline">#</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="AnoPrimer.AnoPrimer.designPrimers">
-<span class="sig-prename descclassname"><span class="pre">AnoPrimer.</span></span><span class="sig-name descname"><span class="pre">designPrimers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_amplicon_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_amplicon_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_primer_pairs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primer_parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_sets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_query</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cDNA_exon_junction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AnoPrimer.AnoPrimer.designPrimers" title="Permalink to this definition">#</a></dt>
-<dd><p>Run whole AnoPrimer workflow to design primers/probes with in one function</p>
+<dt class="sig sig-object py" id="AnoPrimer.design_primers">
+<span class="sig-prename descclassname"><span class="pre">AnoPrimer.</span></span><span class="sig-name descname"><span class="pre">design_primers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_amplicon_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_amplicon_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_primer_pairs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primer_parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cDNA_exon_junction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AnoPrimer.design_primers" title="Permalink to this definition">#</a></dt>
+<dd><p>Run whole AnoPrimer workflow to design primers/probes</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -433,20 +436,14 @@ expression assays should be designed with a max amplicon size of ~120.</p></li>
 for example ‘2L:28545767’. For cDNA primers, this should be an AGAP identifier.</p></li>
 <li><p><strong>primer_parameters</strong> (<em>dict</em><em> or </em><em>'default'</em>) – A dictionary of primer3 parameters to use for primer design. If ‘default’ is specified, default
 primer3 parameters will be generated.</p></li>
-<li><p><strong>sample_sets</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Can be a sample set identifier (e.g., “AG1000G-AO”) or a list of
-sample set identifiers (e.g., [“AG1000G-BF-A”, “AG1000G-BF-B”]) or a
-release identifier (e.g., “3.0”) or a list of release identifiers.</p></li>
-<li><p><strong>sample_query</strong> (<em>str</em><em>, </em><em>optional</em>) – A pandas query string which will be evaluated against the sample
-metadata e.g., “taxon == ‘coluzzii’ and country == ‘Burkina Faso’”.</p></li>
-<li><p><strong>out_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – The directory to write output files to. If not specified, outputs will not be written to file.</p></li>
 <li><p><strong>cDNA_exon_junction</strong> (<em>bool</em><em>, </em><em>optional</em>) – <p>If True, cDNA primers will be designed to span an exon-exon junction. We strongly recommend
 that this is set to True. In the case of gDNA primers, this parameter is ignored.</p>
 <dl class="field-list simple">
 <dt class="field-odd">returns</dt>
-<dd class="field-odd"><ul>
-<li><p><strong>primer_df</strong> (<em>pandas.DataFrame</em>) – A pandas DataFrame containing the primer sequences and their information.</p></li>
-<li><p><strong>blat_df</strong> (<em>pandas.DataFrame</em>) – A pandas DataFrame containing the BLAT alignment information for the primers.</p></li>
-</ul>
+<dd class="field-odd"><p>An AnoPrimerResults object containing the results of the primer design.</p>
+</dd>
+<dt class="field-even">rtype</dt>
+<dd class="field-even"><p>AnoPrimerResults</p>
 </dd>
 </dl>
 </p></li>
@@ -456,30 +453,50 @@ that this is set to True. In the case of gDNA primers, this parameter is ignored
 </dd></dl>
 
 </section>
-<section id="plot-primer-snp-frequencies">
-<h2>plot_primer_snp_frequencies()<a class="headerlink" href="#plot-primer-snp-frequencies" title="Permalink to this headline">#</a></h2>
+<section id="evaluate-primers">
+<h2>evaluate_primers()<a class="headerlink" href="#evaluate-primers" title="Permalink to this headline">#</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="AnoPrimer.AnoPrimer.plot_primer_snp_frequencies">
-<span class="sig-prename descclassname"><span class="pre">AnoPrimer.</span></span><span class="sig-name descname"><span class="pre">plot_primer_snp_frequencies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primer_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gdna_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_sets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq_parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_query</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AnoPrimer.AnoPrimer.plot_primer_snp_frequencies" title="Permalink to this definition">#</a></dt>
-<dd><p>Loop through n primer pairs, retrieving frequency data and plot allele frequencies</p>
+<dt class="sig sig-object py" id="AnoPrimer.AnoPrimerResults.evaluate_primers">
+<span class="sig-prename descclassname"><span class="pre">AnoPrimerResults.</span></span><span class="sig-name descname"><span class="pre">evaluate_primers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_sets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_query</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_loc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'best'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'anoGam3'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AnoPrimer.AnoPrimerResults.evaluate_primers" title="Permalink to this definition">#</a></dt>
+<dd><p>Evaluate the designed primers by plotting SNP frequencies and primer locations.</p>
+<p>This method generates plots of SNP frequencies for each primer pair and the locations
+of the primers in relation to nearby exons on the genome. It also performs a BLAT alignment
+of the primers to the genome using the gget library.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>species</strong> (<em>str</em>) – The species to design primers for. Either ‘gambiae_sl’ or ‘funestus’</p></li>
-<li><p><strong>primer_df</strong> (<em>pandas.DataFrame</em>) – A pandas DataFrame containing the primer sequences and their information, returned by primer3_to_pandas()</p></li>
-<li><p><strong>gdna_pos</strong> (<em>numpy.ndarray</em>) – The genomic positions of the target sequence</p></li>
-<li><p><strong>contig</strong> (<em>str</em>) – The contig of the target sequence, e.g. ‘2L’</p></li>
-<li><p><strong>sample_sets</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Can be a sample set identifier (e.g., “AG1000G-AO”) or a list of
-sample set identifiers (e.g., [“AG1000G-BF-A”, “AG1000G-BF-B”]) or a
-release identifier (e.g., “3.0”) or a list of release identifiers.</p></li>
-<li><p><strong>assay_type</strong> (<em>str</em>) – The type of assay, either ‘gDNA primers’ or ‘gDNA primers + probe’, ‘cDNA primers’
-or ‘probe’</p></li>
-<li><p><strong>seq_parameters</strong> (<em>dict</em>) – A dictionary of parameters for primer3, returned by prepare_sequence()</p></li>
-<li><p><strong>out_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – The directory to write output files to. If not specified, outputs will not be written to file.</p></li>
-<li><p><strong>sample_query</strong> (<em>str</em><em>, </em><em>optional</em>) – A pandas query string which will be evaluated against the sample
-metadata e.g., “taxon == ‘coluzzii’ and country == ‘Burkina Faso’” to subset
-the genotypes to a specific set of samples.</p></li>
+<li><p><strong>sample_sets</strong> (<em>str</em><em> or </em><em>list</em>) – Sample set identifier(s) to use for frequency calculation.</p></li>
+<li><p><strong>sample_query</strong> (<em>str</em>) – A pandas query string to filter the samples.</p></li>
+<li><p><strong>out_dir</strong> (<em>str</em>) – Directory to save the output files.</p></li>
+<li><p><strong>legend_loc</strong> (<em>str</em><em>, </em><em>optional</em>) – Location of the legend in the plot. Default is “best”.</p></li>
+<li><p><strong>assembly</strong> (<em>str</em><em>, </em><em>optional</em>) – The genome assembly to use with BLAT. Default is “anoGam3”.</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="plot-primer-snp-frequencies">
+<h2>plot_primer_snp_frequencies()<a class="headerlink" href="#plot-primer-snp-frequencies" title="Permalink to this headline">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="AnoPrimer.AnoPrimerResults.plot_primer_snp_frequencies">
+<span class="sig-prename descclassname"><span class="pre">AnoPrimerResults.</span></span><span class="sig-name descname"><span class="pre">plot_primer_snp_frequencies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_sets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_query</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AnoPrimer.AnoPrimerResults.plot_primer_snp_frequencies" title="Permalink to this definition">#</a></dt>
+<dd><p>Plot SNP frequencies for each primer pair.</p>
+<p>This method retrieves allele frequency data for each primer pair and generates
+a plot using the Plotly library.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sample_sets</strong> (<em>str</em><em> or </em><em>list</em>) – Sample set identifier(s) to use for frequency calculation.</p></li>
+<li><p><strong>sample_query</strong> (<em>str</em><em>, </em><em>optional</em>) – A pandas query string to filter the samples.</p></li>
+<li><p><strong>out_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – Directory to save the output files. If None, files are not saved.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary containing the frequency data for each primer pair.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -488,21 +505,16 @@ the genotypes to a specific set of samples.</p></li>
 <section id="plot-primer-locs">
 <h2>plot_primer_locs()<a class="headerlink" href="#plot-primer-locs" title="Permalink to this headline">#</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="AnoPrimer.AnoPrimer.plot_primer_locs">
-<span class="sig-prename descclassname"><span class="pre">AnoPrimer.</span></span><span class="sig-name descname"><span class="pre">plot_primer_locs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">species</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primer_res_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primer_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq_parameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_loc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'best'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AnoPrimer.AnoPrimer.plot_primer_locs" title="Permalink to this definition">#</a></dt>
-<dd><p>Plot the position of the primer sets in relation to any nearby exons</p>
+<dt class="sig sig-object py" id="AnoPrimer.AnoPrimerResults.plot_primer_locs">
+<span class="sig-prename descclassname"><span class="pre">AnoPrimerResults.</span></span><span class="sig-name descname"><span class="pre">plot_primer_locs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend_loc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'best'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AnoPrimer.AnoPrimerResults.plot_primer_locs" title="Permalink to this definition">#</a></dt>
+<dd><p>Plot the positions of primer sets in relation to nearby exons.</p>
+<p>This method generates a matplotlib figure showing the locations of primers
+and nearby exons on the genome.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>species</strong> (<em>str</em>) – The species to design primers for. Either ‘gambiae_sl’ or ‘funestus’</p></li>
-<li><p><strong>primer_res_dict</strong> (<em>dict</em>) – A dictionary containing the primer3 results, returned by primer3.designPrimers()</p></li>
-<li><p><strong>primer_df</strong> (<em>pandas.DataFrame</em>) – A pandas DataFrame containing the primer sequences and their information, returned by primer3_to_pandas()</p></li>
-<li><p><strong>contig</strong> (<em>str</em>) – The contig of the target sequence, e.g. ‘2L’</p></li>
-<li><p><strong>seq_parameters</strong> (<em>dict</em>) – A dictionary of parameters for primer3, returned by prepare_sequence()</p></li>
-<li><p><strong>assay_type</strong> (<em>str</em>) – The type of assay, either ‘gDNA primers’ or ‘gDNA primers + probe’, ‘cDNA primers’
-or ‘probe’</p></li>
-<li><p><strong>legend_loc</strong> (<em>str</em><em>, </em><em>optional</em>) – The location of the legend in the plot. Can be ‘best’, ‘upper right’, ‘upper left’, ‘lower left’, ‘lower right’, ‘right’, ‘center left’, ‘center right’, ‘lower center’, ‘upper center’ or ‘center’.</p></li>
-<li><p><strong>out_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – The directory to write output files to. If not specified, outputs will not be written to file.</p></li>
+<li><p><strong>legend_loc</strong> (<em>str</em><em>, </em><em>optional</em>) – Location of the legend in the plot. Default is “best”.</p></li>
+<li><p><strong>out_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – Directory to save the output files. If None, files are not saved.</p></li>
 </ul>
 </dd>
 </dl>
@@ -512,27 +524,49 @@ or ‘probe’</p></li>
 <section id="gget-blat-genome">
 <h2>gget_blat_genome()<a class="headerlink" href="#gget-blat-genome" title="Permalink to this headline">#</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="AnoPrimer.AnoPrimer.gget_blat_genome">
-<span class="sig-prename descclassname"><span class="pre">AnoPrimer.</span></span><span class="sig-name descname"><span class="pre">gget_blat_genome</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primer_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'anoGam3'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AnoPrimer.AnoPrimer.gget_blat_genome" title="Permalink to this definition">#</a></dt>
-<dd><p>Aligns primers to the AgamP3 genome with BLAT.</p>
+<dt class="sig sig-object py" id="AnoPrimer.AnoPrimerResults.gget_blat_genome">
+<span class="sig-prename descclassname"><span class="pre">AnoPrimerResults.</span></span><span class="sig-name descname"><span class="pre">gget_blat_genome</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assembly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'anoGam3'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AnoPrimer.AnoPrimerResults.gget_blat_genome" title="Permalink to this definition">#</a></dt>
+<dd><p>Align primers to the genome using BLAT.</p>
+<p>This method uses the gget library to perform BLAT alignment of the designed primers
+against the specified genome assembly.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>primer_df</strong> (<em>pandas.DataFrame</em>) – A pandas DataFrame containing the primer sequences and their information, returned by primer3_to_pandas()</p></li>
-<li><p><strong>assay_type</strong> (<em>str</em>) – The type of assay, either ‘gDNA primers’ or ‘gDNA primers + probe’, ‘cDNA primers’
-or ‘probe’</p></li>
-<li><p><strong>assembly</strong> (<em>str</em><em>, </em><em>optional</em>) – The genome assembly to use with Blat. ‘anoGam3’ is Anopheles gambiae. Please see the gget documentation for more information.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>assembly</strong> (<em>str</em><em>, </em><em>optional</em>) – The genome assembly to use with BLAT. Default is “anoGam3”.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A DataFrame containing BLAT alignment results, or None if no hits found.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame or None</p>
 </dd>
 </dl>
+</dd></dl>
+
+</section>
+<section id="check-my-oligo">
+<h2>check_my_oligo()<a class="headerlink" href="#check-my-oligo" title="Permalink to this headline">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="AnoPrimer.check_my_oligo">
+<span class="sig-prename descclassname"><span class="pre">AnoPrimer.</span></span><span class="sig-name descname"><span class="pre">check_my_oligo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_sets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'3.0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_query</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">700</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">400</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AnoPrimer.check_my_oligo" title="Permalink to this definition">#</a></dt>
+<dd><p>Align a sequence to AgamP3, retrieve ag3 frequencies in this region and plot.
+Only works with An.gambiae_sl for now.</p>
+</dd></dl>
+
+</section>
+<section id="plot-sequence-frequencies">
+<h2>plot_sequence_frequencies()<a class="headerlink" href="#plot-sequence-frequencies" title="Permalink to this headline">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="AnoPrimer.plot_sequence_frequencies">
+<span class="sig-prename descclassname"><span class="pre">AnoPrimer.</span></span><span class="sig-name descname"><span class="pre">plot_sequence_frequencies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_resource</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">region</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_sets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_query</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">700</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">400</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AnoPrimer.plot_sequence_frequencies" title="Permalink to this definition">#</a></dt>
+<dd><p>Retrieve frequencies</p>
 </dd></dl>
 
 </section>
 <section id="primer-params">
 <h2>primer_params()<a class="headerlink" href="#primer-params" title="Permalink to this headline">#</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="AnoPrimer.AnoPrimer.primer_params">
-<span class="sig-prename descclassname"><span class="pre">AnoPrimer.</span></span><span class="sig-name descname"><span class="pre">primer_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primer_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_primer_pairs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplicon_size_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generate_defaults</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AnoPrimer.AnoPrimer.primer_params" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="AnoPrimer.primer_params">
+<span class="sig-prename descclassname"><span class="pre">AnoPrimer.</span></span><span class="sig-name descname"><span class="pre">primer_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primer_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_primer_pairs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplicon_size_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generate_defaults</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AnoPrimer.primer_params" title="Permalink to this definition">#</a></dt>
 <dd><p>adds necessary parameters depending on assay_type, or can
 generate the default parameters</p>
 <dl class="field-list simple">
@@ -554,8 +588,8 @@ primer3 parameters will be generated.</p></li>
 <section id="primer3-to-pandas">
 <h2>primer3_to_pandas()<a class="headerlink" href="#primer3-to-pandas" title="Permalink to this headline">#</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="AnoPrimer.AnoPrimer.primer3_to_pandas">
-<span class="sig-prename descclassname"><span class="pre">AnoPrimer.</span></span><span class="sig-name descname"><span class="pre">primer3_to_pandas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primer_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AnoPrimer.AnoPrimer.primer3_to_pandas" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="AnoPrimer.primer3_to_pandas">
+<span class="sig-prename descclassname"><span class="pre">AnoPrimer.</span></span><span class="sig-name descname"><span class="pre">primer3_to_pandas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primer_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AnoPrimer.primer3_to_pandas" title="Permalink to this definition">#</a></dt>
 <dd><p>Convert primer3 results to pandas dataframe</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -578,8 +612,8 @@ or ‘probe’</p></li>
 <section id="primer3-run-statistics">
 <h2>primer3_run_statistics()<a class="headerlink" href="#primer3-run-statistics" title="Permalink to this headline">#</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="AnoPrimer.AnoPrimer.primer3_run_statistics">
-<span class="sig-prename descclassname"><span class="pre">AnoPrimer.</span></span><span class="sig-name descname"><span class="pre">primer3_run_statistics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primer_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AnoPrimer.AnoPrimer.primer3_run_statistics" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="AnoPrimer.primer3_run_statistics">
+<span class="sig-prename descclassname"><span class="pre">AnoPrimer.</span></span><span class="sig-name descname"><span class="pre">primer3_run_statistics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primer_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assay_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#AnoPrimer.primer3_run_statistics" title="Permalink to this definition">#</a></dt>
 <dd><p>Prints out primer3 run statistics from the primer3 results dictionary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -662,10 +696,13 @@ or ‘probe’</p></li>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#designprimers">designPrimers()</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#design-primers">design_primers()</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#evaluate-primers">evaluate_primers()</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-primer-snp-frequencies">plot_primer_snp_frequencies()</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-primer-locs">plot_primer_locs()</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gget-blat-genome">gget_blat_genome()</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#check-my-oligo">check_my_oligo()</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-sequence-frequencies">plot_sequence_frequencies()</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#primer-params">primer_params()</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#primer3-to-pandas">primer3_to_pandas()</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#primer3-run-statistics">primer3_run_statistics()</a></li>
