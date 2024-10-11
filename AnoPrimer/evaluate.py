@@ -270,6 +270,9 @@ class AnoPrimerResults:
             print("No exons in close proximity for loc plot")
             return
 
+        # remove duplicate exons from different transcripts
+        locgff = locgff.drop_duplicates("Name")
+
         # Set up the plot
         fig, ax = plt.subplots(1, 1, figsize=[16, 4])
         self._configure_plot_axes(ax, min_, max_, start, end)
