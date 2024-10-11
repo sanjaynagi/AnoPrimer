@@ -470,8 +470,8 @@ def _plotly_primers(
         showlegend=False,
     )
     if out_dir:
-        fig.write_html(f"{name}_{assay_type}.html")
-        fig.write_image(f"{name}_{assay_type}.pdf")
+        fig.write_html(f"{name}_{assay_type}_snps.html")
+        fig.write_image(f"{name}_{assay_type}_snps.pdf")
     fig.show()
 
 
