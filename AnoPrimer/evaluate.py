@@ -271,7 +271,7 @@ class AnoPrimerResults:
             return
 
         # remove duplicate exons from different transcripts
-        locgff = locgff.drop_duplicates("Name")
+        locgff = locgff.drop_duplicates(exon_id_col)
 
         # Set up the plot
         fig, ax = plt.subplots(1, 1, figsize=[16, 4])

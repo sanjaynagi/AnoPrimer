@@ -7,6 +7,7 @@ from .utils import (
     _convert_results_dict_naming,
     _return_oligo_list,
     extract_trailing_digits,
+    load_params_json,
     retrieve_data_resource,
 )
 
@@ -46,9 +47,9 @@ def design_primers(
     target : str
         The target to design primers for. For gDNA primers, this should be a contig:position string,
         for example '2L:28545767'. For cDNA primers, this should be an AGAP identifier.
-    primer_parameters : dict or 'default'
-        A dictionary of primer3 parameters to use for primer design. If 'default' is specified, default
-        primer3 parameters will be generated.
+    primer_parameters : dict or str ['default', 'stringent', 'relaxed']
+        A dictionary of primer3 parameters to use for primer design, or a string of either
+        'default', 'stringent' or 'relaxed' to generate default primer3 parameters.
     cDNA_exon_junction : bool, optional
         If True, cDNA primers will be designed to span an exon-exon junction. We strongly recommend
         that this is set to True. In the case of gDNA primers, this parameter is ignored.
@@ -68,22 +69,13 @@ def design_primers(
     amplicon_size_range = [[min_amplicon_size, max_amplicon_size]]
 
     # adds some necessary parameters depending on assay type
-    if primer_parameters == "default":
-        primer_parameters = primer_params(
-            primer_parameters=None,
-            assay_type=assay_type,
-            n_primer_pairs=n_primer_pairs,
-            amplicon_size_range=amplicon_size_range,
-            generate_defaults=True,
-        )
-    else:
-        primer_parameters = primer_params(
-            primer_parameters=primer_parameters,
-            assay_type=assay_type,
-            n_primer_pairs=n_primer_pairs,
-            amplicon_size_range=amplicon_size_range,
-            generate_defaults=False,
-        )
+    primer_parameters = primer_params(
+        primer_parameters=primer_parameters,
+        assay_type=assay_type,
+        n_primer_pairs=n_primer_pairs,
+        amplicon_size_range=amplicon_size_range,
+    )
+
     # load genome sequence
     genome_seq = data_resource.genome_sequence(region=contig)
     print(f"Our genome sequence for {contig} is {genome_seq.shape[0]} bp long")
@@ -134,7 +126,6 @@ def prepare_gDNA_sequence(
     genome_seq,
     assay_name,
     assay_type,
-    probe_exclude_region_size=20,
 ):
     """
     Extracts sequence of interest from genome sequence
@@ -302,7 +293,6 @@ def primer_params(
     primer_parameters=None,
     n_primer_pairs=None,
     amplicon_size_range=None,
-    generate_defaults=False,
 ):
     """
     adds necessary parameters depending on assay_type, or can
@@ -314,41 +304,20 @@ def primer_params(
         The type of assay, either 'gDNA primers' or 'gDNA primers + probe', 'cDNA primers'
         or 'probe'
     primer_parameters : dict
-        A dictionary of primer3 parameters to use for primer design. If 'default' is specified, default
-        primer3 parameters will be generated.
+        Either, a dictionary of primer3 parameters to use for primer design, or a string of either
+        'default', 'stringent' or 'relaxed' to generate default primer3 parameters.
     n_primer_pairs : int
         The number of primer pairs to design.
     amplicon_size_range : list
         The minimum and maximum size of the amplicon to design primers for
-    generate_defaults : bool
-        If True, default primer3 parameters will be generated.
     """
 
-    if generate_defaults:
-        primer_parameters = {
-            "PRIMER_OPT_SIZE": 20,
-            "PRIMER_TASK": "generic",
-            "PRIMER_MIN_SIZE": 17,
-            "PRIMER_MAX_SIZE": 24,
-            "PRIMER_OPT_TM": 60.0,
-            "PRIMER_MIN_TM": 57.0,
-            "PRIMER_MAX_TM": 63.0,
-            "PRIMER_MIN_GC": 30.0,
-            "PRIMER_MAX_GC": 70.0,
-            # this parameter is the minimum distance between successive pairs.
-            # If 1, it means successive primer pairs could be identical bar one base shift
-            "PRIMER_MIN_THREE_PRIME_DISTANCE": 3,
-            # Probe size preferences if selected, otherwise ignored
-            "PRIMER_INTERNAL_OPT_SIZE": 16,
-            "PRIMER_INTERNAL_MIN_SIZE": 10,
-            "PRIMER_INTERNAL_MAX_SIZE": 22,
-            # Probe Tm considerations are quite relaxed, assumed that LNAs will be used
-            # later to affect TM
-            "PRIMER_INTERNAL_MIN_TM": 45,
-            "PRIMER_INTERNAL_MAX_TM": 65,
-            # Extra primer3 parameters can go here
-            # In the same format as above
-        }
+    if isinstance(primer_parameters, str):
+        primer_parameters = load_params_json(primer_parameters)
+    else:
+        assert isinstance(
+            primer_parameters, dict
+        ), "primer_parameters must be a dictionary or a string"
 
     primer_parameters["PRIMER_NUM_RETURN"] = n_primer_pairs
     primer_parameters["PRIMER_PRODUCT_SIZE_RANGE"] = amplicon_size_range
