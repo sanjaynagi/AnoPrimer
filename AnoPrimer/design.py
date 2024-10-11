@@ -47,9 +47,9 @@ def design_primers(
     target : str
         The target to design primers for. For gDNA primers, this should be a contig:position string,
         for example '2L:28545767'. For cDNA primers, this should be an AGAP identifier.
-    primer_parameters : dict or 'default'
-        A dictionary of primer3 parameters to use for primer design. If 'default' is specified, default
-        primer3 parameters will be generated.
+    primer_parameters : dict or str ['default', 'stringent', 'relaxed']
+        A dictionary of primer3 parameters to use for primer design, or a string of either
+        'default', 'stringent' or 'relaxed' to generate default primer3 parameters.
     cDNA_exon_junction : bool, optional
         If True, cDNA primers will be designed to span an exon-exon junction. We strongly recommend
         that this is set to True. In the case of gDNA primers, this parameter is ignored.
