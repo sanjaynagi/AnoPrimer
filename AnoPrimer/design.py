@@ -179,14 +179,11 @@ def prepare_gDNA_sequence(
     }
 
     if "probe" in assay_type:
-        seq_parameters["SEQUENCE_INTERNAL_EXCLUDED_REGION"] = [
-            [1, target_loc_primer3[0] - probe_exclude_region_size],
-            [
-                target_loc_primer3[0] + probe_exclude_region_size,
-                len(target_sequence)
-                - (target_loc_primer3[0] + probe_exclude_region_size),
-            ],
+        seq_parameters["SEQUENCE_INTERNAL_OVERLAP_JUNCTION_LIST"] = [
+            target_loc_primer3[0]
         ]
+        seq_parameters["PRIMER_MIN_3_PRIME_OVERLAP_OF_JUNCTION"] = 3
+        seq_parameters["PRIMER_MIN_5_PRIME_OVERLAP_OF_JUNCTION"] = 3
 
     return seq_parameters
 
