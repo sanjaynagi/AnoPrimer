@@ -568,3 +568,16 @@ def _get_base_freqs(freqs, ref_alt_array):
             base = ref_alt_array[i, i_base]
             freq_df.loc[i, f"{base}_freq"] = freqs[i, i_base]
     return freq_df
+
+
+def load_params_json(param_type):
+    import requests
+
+    url = f"https://raw.githubusercontent.com/sanjaynagi/AnoPrimer/refs/heads/main/AnoPrimer/params/{param_type}.json"
+    # Send a GET request to the URL
+    response = requests.get(url)
+    # Raise an exception for bad status codes
+    response.raise_for_status()
+    # Parse the JSON content
+    data = response.json()
+    return data
