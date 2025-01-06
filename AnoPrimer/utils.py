@@ -13,9 +13,13 @@ def retrieve_data_resource(species):
         "funestus",
     ], f"species {species} not recognised, please use 'gambiae_sl' or 'funestus'"
     if species == "gambiae_sl":
-        data_resource = malariagen_data.Ag3(url="gs://vo_agam_release/", pre=True)
+        data_resource = malariagen_data.Ag3(
+            url="gs://vo_agam_release_master_us_central1", pre=True
+        )
     elif species == "funestus":
-        data_resource = malariagen_data.Af1(url="gs://vo_afun_release/", pre=True)
+        data_resource = malariagen_data.Af1(
+            url="gs://vo_afun_release_master_us_central1", pre=True
+        )
     return data_resource
 
 
@@ -39,7 +43,9 @@ def check_my_oligo(
     print("plotting frequencies in ag3 data")
 
     fig = plot_sequence_frequencies(
-        data_resource=malariagen_data.Ag3(url="gs://vo_agam_release/", pre=True),
+        data_resource=malariagen_data.Ag3(
+            url="gs://vo_agam_release_master_us_central1", pre=True
+        ),
         region=region_span,
         sample_sets=sample_sets,
         sample_query=sample_query,
