@@ -58,7 +58,30 @@ def check_my_oligo(
 def plot_sequence_frequencies(
     data_resource, region, sample_sets=None, sample_query=None, width=700, height=400
 ):
-    """Retrieve frequencies"""
+    """Retrieve frequencies and plot"""
+    
+    data = get_sequence_frequencies(
+        data_resource=data_resource, 
+        region=region, 
+        sample_sets=sample_sets, 
+        sample_query=sample_query, 
+    )
+
+    fig = _plotly_frequencies(
+        data=data,
+        region=region,
+        sample_sets=sample_sets,
+        sample_query=sample_query,
+        width=width,
+        height=height,
+    )
+    return fig
+
+    
+def get_sequence_frequencies(
+    data_resource, region, sample_sets=None, sample_query=None
+):
+    """Retrieve frequencies and return as dataframe"""
 
     snps = data_resource.snp_calls(
         region=region, sample_sets=sample_sets, sample_query=sample_query
@@ -80,16 +103,8 @@ def plot_sequence_frequencies(
     freq_df = _get_base_freqs(_addZeroCols(freq_arr), ref_alt_arr).filter(like="freq")
 
     data = pd.concat([df, freq_df], axis=1)
-
-    fig = _plotly_frequencies(
-        data=data,
-        region=region,
-        sample_sets=sample_sets,
-        sample_query=sample_query,
-        width=width,
-        height=height,
-    )
-    return fig
+    
+    return(data)
 
 
 def _plotly_frequencies(
